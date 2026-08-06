@@ -13,6 +13,9 @@ import type {
   RecurringRule,
   RecurringRuleCreateInput,
   RecurringRuleUpdateInput,
+  SavingsGoal,
+  SavingsGoalCreateInput,
+  SavingsGoalUpdateInput,
   Transaction,
   TransactionCreateInput,
   TransactionUpdateInput,
@@ -207,5 +210,42 @@ export function useDeleteRecurringRule() {
   return useMutation({
     mutationFn: (id: string) => apiRequest<void>(`/recurring-rules/${id}`, getToken, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["recurring-rules"] }),
+  });
+}
+
+export function useSavingsGoals() {
+  const { getToken } = useAuth();
+  return useQuery({
+    queryKey: ["savings-goals"],
+    queryFn: () => apiRequest<SavingsGoal[]>("/savings-goals", getToken),
+  });
+}
+
+export function useCreateSavingsGoal() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: SavingsGoalCreateInput) =>
+      apiRequest<SavingsGoal>("/savings-goals", getToken, { method: "POST", body: JSON.stringify(input) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savings-goals"] }),
+  });
+}
+
+export function useUpdateSavingsGoal() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: SavingsGoalUpdateInput & { id: string }) =>
+      apiRequest<SavingsGoal>(`/savings-goals/${id}`, getToken, { method: "PUT", body: JSON.stringify(input) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savings-goals"] }),
+  });
+}
+
+export function useDeleteSavingsGoal() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest<void>(`/savings-goals/${id}`, getToken, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savings-goals"] }),
   });
 }

@@ -7,6 +7,7 @@ import { formatMoney } from "~/lib/format";
 import { EXPENSE_CATEGORY_DEFS, type CategoryDef } from "~/lib/categories";
 import { computeBudgetAllocation } from "~/lib/budget-allocation";
 import { BudgetAllocationChart } from "~/components/budget-allocation-chart";
+import { SavingsGoalsSection } from "~/components/savings-goals-section";
 
 function monthStartIso(): string {
   const d = new Date();
@@ -191,6 +192,8 @@ export default function BudgetsPage() {
           error={upsertBudget.isError ? "Couldn't save that. Try again." : null}
         />
       )}
+
+      <SavingsGoalsSection />
     </div>
   );
 }

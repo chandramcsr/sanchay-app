@@ -110,3 +110,39 @@ export interface RecurringRuleUpdateInput {
   frequency?: RecurringFrequency;
   end_date?: string;
 }
+
+export interface SavingsGoal {
+  id: string;
+  name: string;
+  target_amount: number;
+  target_date: string | null;
+  account_id: string;
+  // Computed by the backend from the linked account's actual balance
+  // and recent transaction history -- not stored, always fresh.
+  current_amount: number;
+  pct: number;
+  remaining: number;
+  monthly_contribution_rate: number;
+  projected_completion_date: string | null;
+  on_track_for_target_date: boolean | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface SavingsGoalCreateInput {
+  name: string;
+  target_amount: number;
+  target_date?: string;
+  account_id: string;
+}
+
+// Mirrors app/schemas/savings_goals.py's SavingsGoalUpdateRequest --
+// account_id IS editable here, unlike transactions/recurring rules: a
+// goal can be re-pointed at a different account, since progress is
+// entirely derived from whichever account it currently points at.
+export interface SavingsGoalUpdateInput {
+  name?: string;
+  target_amount?: number;
+  target_date?: string;
+  account_id?: string;
+}
