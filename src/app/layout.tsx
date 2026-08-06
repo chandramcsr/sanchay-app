@@ -45,14 +45,6 @@ export default function RootLayout({
                 <NavLinks />
               </Show>
             </div>
-            <Show when="signed-out">
-              <Link
-                href="/sign-in"
-                className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-navy transition hover:opacity-90"
-              >
-                Sign in
-              </Link>
-            </Show>
             <Show when="signed-in">
               <UserButton />
             </Show>
