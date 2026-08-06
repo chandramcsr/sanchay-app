@@ -32,26 +32,43 @@ export default function BudgetsPage() {
       )}
 
       {budgets && budgets.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {budgets.map((b) => (
-            <div
-              key={b.id}
-              className="flex items-center justify-between rounded-xl bg-card border border-border px-5 py-4"
-            >
-              <div className="font-medium text-navy">{b.category}</div>
-              <div className="flex items-center gap-4">
-                <div className="font-mono tabular-nums text-navy">{formatMoney(b.monthly_limit)}/mo</div>
-                <button
-                  onClick={() => deleteBudget.mutate(b.id)}
-                  disabled={deleteBudget.isPending}
-                  className="text-xs text-muted transition hover:text-negative disabled:opacity-50"
-                  aria-label={`Delete ${b.category} budget`}
-                >
-                  Delete
-                </button>
+        <div className="flex flex-col gap-3">
+          {budgets.map((b) => {
+            const pct = b.monthly_limit > 0 ? Math.min(b.spent / b.monthly_limit, 1) : 0;
+            const overBudget = b.spent > b.monthly_limit;
+            return (
+              <div key={b.id} className="rounded-xl bg-card border border-border px-5 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="font-medium text-navy">{b.category}</div>
+                  <button
+                    onClick={() => deleteBudget.mutate(b.id)}
+                    disabled={deleteBudget.isPending}
+                    className="text-xs text-muted transition hover:text-negative disabled:opacity-50"
+                    aria-label={`Delete ${b.category} budget`}
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div className="mt-1 flex items-baseline justify-between font-mono text-sm tabular-nums">
+                  <span className={overBudget ? "font-medium text-negative" : "text-navy"}>
+                    {formatMoney(b.spent)}
+                  </span>
+                  <span className="text-muted">of {formatMoney(b.monthly_limit)}</span>
+                </div>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-cream">
+                  <div
+                    className={`h-full rounded-full transition-all ${overBudget ? "bg-negative" : "bg-gold"}`}
+                    style={{ width: `${pct * 100}%` }}
+                  />
+                </div>
+                {overBudget && (
+                  <p className="mt-1.5 text-xs text-negative">
+                    {formatMoney(b.spent - b.monthly_limit)} over this month
+                  </p>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

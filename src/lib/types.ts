@@ -52,6 +52,7 @@ export interface Budget {
   id: string;
   category: string;
   monthly_limit: number;
+  spent: number;
   created_at: string;
   updated_at: string | null;
 }
@@ -59,4 +60,30 @@ export interface Budget {
 export interface BudgetUpsertInput {
   category: string;
   monthly_limit: number;
+}
+
+export type RecurringFrequency = "weekly" | "biweekly" | "monthly" | "quarterly" | "yearly";
+
+export interface RecurringRule {
+  id: string;
+  account_id: string;
+  amount: number;
+  description: string;
+  category: string | null;
+  frequency: RecurringFrequency;
+  start_date: string;
+  end_date: string | null;
+  last_materialized: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface RecurringRuleCreateInput {
+  account_id: string;
+  amount: number;
+  description: string;
+  category?: string;
+  frequency: RecurringFrequency;
+  start_date: string;
+  end_date?: string;
 }

@@ -10,6 +10,8 @@ import type {
   AccountUpdateInput,
   Budget,
   BudgetUpsertInput,
+  RecurringRule,
+  RecurringRuleCreateInput,
   Transaction,
   TransactionCreateInput,
 } from "~/lib/types";
@@ -122,5 +124,38 @@ export function useDeleteBudget() {
   return useMutation({
     mutationFn: (id: string) => apiRequest<void>(`/budgets/${id}`, getToken, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["budgets"] }),
+  });
+}
+
+export function useRecurringRules() {
+  const { getToken } = useAuth();
+  return useQuery({
+    queryKey: ["recurring-rules"],
+    queryFn: () => apiRequest<RecurringRule[]>("/recurring-rules", getToken),
+  });
+}
+
+export function useCreateRecurringRule() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RecurringRuleCreateInput) =>
+      apiRequest<RecurringRule>("/recurring-rules", getToken, { method: "POST", body: JSON.stringify(input) }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["recurring-rules"] });
+      // Materialization happens server-side on the next GET /accounts,
+      // not at rule-creation time -- nothing to invalidate for
+      // accounts/transactions yet here, only once that next fetch
+      // actually runs.
+    },
+  });
+}
+
+export function useDeleteRecurringRule() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest<void>(`/recurring-rules/${id}`, getToken, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["recurring-rules"] }),
   });
 }

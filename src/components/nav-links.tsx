@@ -33,6 +33,21 @@ export const ROUTES = [
       </svg>
     ),
   },
+  {
+    href: "/recurring",
+    label: "Recurring",
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M17 2l4 4-4 4M3 12v-2a4 4 0 014-4h14M7 22l-4-4 4-4M21 12v2a4 4 0 01-4 4H3"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    ),
+  },
 ] as const;
 
 /**
