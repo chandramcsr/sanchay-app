@@ -22,7 +22,7 @@ import { useTransactionModal } from "~/components/transaction-modal";
 export function AppNav() {
   const pathname = usePathname();
   const { open } = useTransactionModal();
-  const [first, second, third] = ROUTES;
+  const [home, activity, accounts, settings] = ROUTES;
 
   const navLink = (route: (typeof ROUTES)[number]) => {
     const active = pathname.startsWith(route.href);
@@ -45,8 +45,8 @@ export function AppNav() {
       className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-around border-t border-border bg-card py-2 md:inset-x-auto md:bottom-0 md:left-0 md:top-16 md:w-24 md:flex-col md:justify-start md:gap-6 md:border-t-0 md:border-r md:pt-8"
       style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
     >
-      {navLink(first)}
-      {navLink(second)}
+      {navLink(home)}
+      {navLink(activity)}
       <button
         onClick={open}
         aria-label="Add transaction"
@@ -56,7 +56,8 @@ export function AppNav() {
           <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
       </button>
-      {navLink(third)}
+      {navLink(accounts)}
+      {navLink(settings)}
     </nav>
   );
 }

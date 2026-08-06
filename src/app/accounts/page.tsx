@@ -26,20 +26,12 @@ export default function AccountsPage() {
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <Link
-          href="/budgets"
-          className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-center text-sm font-medium text-navy transition hover:border-gold"
-        >
-          Budgets
-        </Link>
-        <Link
-          href="/settings"
-          className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-center text-sm font-medium text-navy transition hover:border-gold"
-        >
-          Settings
-        </Link>
-      </div>
+      <Link
+        href="/budgets"
+        className="block rounded-xl border border-border bg-card px-4 py-3 text-center text-sm font-medium text-navy transition hover:border-gold"
+      >
+        Budgets
+      </Link>
 
       {isError && (
         <div className="rounded-xl border border-negative/30 bg-negative/5 px-4 py-3 text-sm text-negative">
