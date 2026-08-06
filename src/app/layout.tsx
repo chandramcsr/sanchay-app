@@ -6,6 +6,7 @@ import { type Metadata } from "next";
 
 import { QueryProvider } from "~/components/query-provider";
 import { NavLinks } from "~/components/nav-links";
+import { BottomNav } from "~/components/bottom-nav";
 import { Logo } from "~/components/logo";
 
 export const metadata: Metadata = {
@@ -57,8 +58,11 @@ export default function RootLayout({
             </Show>
           </header>
           <QueryProvider>
-            <main className="mx-auto max-w-3xl px-6 py-8">{children}</main>
+            <main className="mx-auto max-w-3xl px-6 py-8 pb-24 md:pb-8">{children}</main>
           </QueryProvider>
+          <Show when="signed-in">
+            <BottomNav />
+          </Show>
         </body>
       </html>
     </ClerkProvider>
