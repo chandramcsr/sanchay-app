@@ -11,7 +11,13 @@
 
 import { env } from "~/env";
 
-const API_BASE = env.NEXT_PUBLIC_API_URL + "/api/v1";
+// .replace() guards against a trailing slash in NEXT_PUBLIC_API_URL --
+// easy to paste one in by accident copying a URL, and the naive
+// concatenation below would then produce a double slash
+// (".../onrender.com//api/v1/accounts"), which FastAPI/Starlette
+// treats as a genuinely different, non-existent path rather than
+// normalizing it away -- a real 404, not a cosmetic issue.
+const API_BASE = env.NEXT_PUBLIC_API_URL.replace(/\/+$/, "") + "/api/v1";
 
 export class ApiError extends Error {
   status: number;
