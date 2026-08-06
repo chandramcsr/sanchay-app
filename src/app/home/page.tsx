@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 
-import { useTransactions } from "~/lib/queries";
-import { formatMoney, formatDate } from "~/lib/format";
+import { useAccounts, useTransactions } from "~/lib/queries";
+import { formatMoney, formatDate, ACCOUNT_TYPE_LABELS, ACCOUNT_TYPE_ICONS, isDebtAccountType } from "~/lib/format";
 import { categoryIcon } from "~/lib/categories";
 
 function monthStartIso(): string {
@@ -21,6 +21,7 @@ function daysInCurrentMonth(): number {
 }
 
 export default function HomePage() {
+  const { data: accounts } = useAccounts();
   const { data: monthTransactions, isLoading, isError } = useTransactions({
     startDate: monthStartIso(),
     endDate: todayIso(),
@@ -30,6 +31,24 @@ export default function HomePage() {
   const income = monthTransactions?.filter((t) => t.amount > 0).reduce((s, t) => s + t.amount, 0) ?? 0;
   const expenses = monthTransactions?.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0) ?? 0;
   const netCashFlow = income - expenses;
+
+  // Debt accounts (credit cards, loans) grouped by type, amount owed
+  // shown as a positive dollar figure rather than the signed negative
+  // it's actually stored as -- matches ledger-app's own Summary card
+  // (accountDebts + debtsByType in HomeTab.tsx) exactly: same debt-type
+  // definition, same "only count the negative portion" guard (an
+  // overpaid credit card sitting positive doesn't count as debt owed),
+  // same descending sort. Corrected placement: this was originally
+  // built on Accounts by mistake -- ledger-app's own version lives on
+  // Home, right after the top balance card.
+  const debtsByType = (accounts ?? [])
+    .filter((a) => isDebtAccountType(a.type))
+    .reduce<Record<string, number>>((map, a) => {
+      const owed = Math.abs(Math.min(0, a.current_balance));
+      if (owed > 0) map[a.type] = (map[a.type] ?? 0) + owed;
+      return map;
+    }, {});
+  const debtEntries = Object.entries(debtsByType).sort((a, b) => b[1] - a[1]);
 
   const daysInMonth = daysInCurrentMonth();
   const dailyNet: number[] = Array.from({ length: daysInMonth }, () => 0);
@@ -57,6 +76,23 @@ export default function HomePage() {
       {isError && (
         <div className="rounded-xl border border-negative/30 bg-negative/5 px-4 py-3 text-sm text-negative">
           Couldn&apos;t load your activity. Check your connection and try again.
+        </div>
+      )}
+
+      {debtEntries.length > 0 && (
+        <div className="rounded-2xl bg-card border border-border px-5 py-4">
+          <div className="font-display text-lg font-bold text-navy">Summary</div>
+          <div className="mt-2 flex flex-col divide-y divide-border">
+            {debtEntries.map(([type, total]) => (
+              <div key={type} className="flex items-center justify-between py-2">
+                <span className="flex items-center gap-2 text-navy">
+                  <span aria-hidden="true">{ACCOUNT_TYPE_ICONS[type]}</span>
+                  {ACCOUNT_TYPE_LABELS[type]}s
+                </span>
+                <span className="font-mono tabular-nums text-navy">{formatMoney(total)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
