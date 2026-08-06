@@ -163,12 +163,22 @@ export function useCreateRecurringRule() {
   return useMutation({
     mutationFn: (input: RecurringRuleCreateInput) =>
       apiRequest<RecurringRule>("/recurring-rules", getToken, { method: "POST", body: JSON.stringify(input) }),
-    onSuccess: () => {
+    onSuccess: async () => {
       void queryClient.invalidateQueries({ queryKey: ["recurring-rules"] });
       // Materialization happens server-side on the next GET /accounts,
-      // not at rule-creation time -- nothing to invalidate for
-      // accounts/transactions yet here, only once that next fetch
-      // actually runs.
+      // not at rule-creation time -- awaiting a real refetch here
+      // (not just invalidating and hoping something else refetches
+      // soon) is what actually runs it. Without this, a newly created
+      // rule sits with zero materialized transactions until whatever
+      // *else* happens to trigger a fresh accounts fetch, which could
+      // be a long time or never in a single session -- exactly the
+      // bug this fixes (a rule existed but Activity showed "No
+      // transactions yet").
+      await queryClient.refetchQueries({ queryKey: ["accounts"] });
+      // Only after that completes -- not concurrently with it -- so
+      // this refetch doesn't race ahead of materialization and miss
+      // the transaction it just created.
+      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
   });
 }
@@ -179,7 +189,15 @@ export function useUpdateRecurringRule() {
   return useMutation({
     mutationFn: ({ id, ...input }: RecurringRuleUpdateInput & { id: string }) =>
       apiRequest<RecurringRule>(`/recurring-rules/${id}`, getToken, { method: "PUT", body: JSON.stringify(input) }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["recurring-rules"] }),
+    onSuccess: async () => {
+      void queryClient.invalidateQueries({ queryKey: ["recurring-rules"] });
+      // Same reasoning as useCreateRecurringRule -- a frequency change
+      // can shift what's due next, so this needs a real, awaited
+      // refetch to actually run materialization, not just an
+      // invalidation that hopes something else refetches soon.
+      await queryClient.refetchQueries({ queryKey: ["accounts"] });
+      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
   });
 }
 

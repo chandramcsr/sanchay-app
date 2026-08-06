@@ -21,6 +21,45 @@ export default function TransactionsPage() {
 
   const accountName = (id: string) => accounts?.find((a) => a.id === id)?.name ?? "—";
 
+  const hasTransactions = !!transactions && transactions.length > 0;
+  const hasRecurring = !!recurringRules && recurringRules.length > 0;
+
+  // Real content, not a bare link -- transactions post automatically
+  // based on frequency (see materialize_due_transactions), so there's
+  // nothing to "log" here day to day; this is a status view of what's
+  // scheduled, with a link to /recurring for actual management
+  // (create/edit/delete, end dates). Positioned above the "no
+  // transactions yet" empty state when there aren't any yet, instead
+  // of always sitting below it -- with nothing else on the page, this
+  // is the more useful thing to see first, not buried under an empty
+  // placeholder.
+  const recurringSection = hasRecurring ? (
+    <div className="rounded-2xl bg-card border border-border px-5 py-4">
+      <Link href="/recurring" className="font-display text-lg font-bold text-navy hover:text-gold">
+        Recurring
+      </Link>
+      <div className="mt-2 flex flex-col divide-y divide-border">
+        {recurringRules.slice(0, 3).map((r) => (
+          <div key={r.id} className="flex items-center justify-between py-2.5">
+            <div className="flex items-center gap-3">
+              <span className="text-xl" aria-hidden="true">
+                {categoryIcon(r.category)}
+              </span>
+              <div>
+                <div className="text-sm font-medium text-navy">{r.description}</div>
+                <div className="text-xs text-muted">{FREQUENCY_LABELS[r.frequency] ?? r.frequency}</div>
+              </div>
+            </div>
+            <div className={`font-mono text-sm tabular-nums ${r.amount < 0 ? "text-negative" : "text-positive"}`}>
+              {r.amount >= 0 ? "+" : ""}
+              {formatMoney(r.amount)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-2xl font-bold text-navy">Activity</h1>
@@ -55,6 +94,8 @@ export default function TransactionsPage() {
 
           {isLoading && <div className="text-sm text-muted">Loading transactions…</div>}
 
+          {!hasTransactions && recurringSection}
+
           {transactions && transactions.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border px-6 py-10 text-center">
               <p className="text-navy">No transactions yet.</p>
@@ -62,7 +103,7 @@ export default function TransactionsPage() {
             </div>
           )}
 
-          {transactions && transactions.length > 0 && (
+          {hasTransactions && (
             <div className="flex flex-col gap-2">
               {transactions.map((t) =>
                 editingId === t.id ? (
@@ -120,39 +161,9 @@ export default function TransactionsPage() {
               )}
             </div>
           )}
-        </>
-      )}
 
-      {/* Real content, not a bare link -- transactions post automatically
-          based on frequency (see materialize_due_transactions), so
-          there's nothing to "log" here day to day; this is a status
-          view of what's scheduled, with a link to /recurring for actual
-          management (create/edit/delete, end dates). */}
-      {recurringRules && recurringRules.length > 0 && (
-        <div className="rounded-2xl bg-card border border-border px-5 py-4">
-          <Link href="/recurring" className="font-display text-lg font-bold text-navy hover:text-gold">
-            Recurring
-          </Link>
-          <div className="mt-2 flex flex-col divide-y divide-border">
-            {recurringRules.slice(0, 3).map((r) => (
-              <div key={r.id} className="flex items-center justify-between py-2.5">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl" aria-hidden="true">
-                    {categoryIcon(r.category)}
-                  </span>
-                  <div>
-                    <div className="text-sm font-medium text-navy">{r.description}</div>
-                    <div className="text-xs text-muted">{FREQUENCY_LABELS[r.frequency] ?? r.frequency}</div>
-                  </div>
-                </div>
-                <div className={`font-mono text-sm tabular-nums ${r.amount < 0 ? "text-negative" : "text-positive"}`}>
-                  {r.amount >= 0 ? "+" : ""}
-                  {formatMoney(r.amount)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+          {hasTransactions && recurringSection}
+        </>
       )}
     </div>
   );
