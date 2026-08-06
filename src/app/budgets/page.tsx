@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useBudgets, useDeleteBudget, useUpsertBudget } from "~/lib/queries";
 import { formatMoney } from "~/lib/format";
+import { EXPENSE_CATEGORIES } from "~/lib/categories";
 
 export default function BudgetsPage() {
   const { data: budgets, isLoading, isError } = useBudgets();
@@ -86,7 +87,7 @@ function BudgetForm({
   submitting: boolean;
   error: string | null;
 }) {
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string>(EXPENSE_CATEGORIES[0]);
   const [limit, setLimit] = useState("");
 
   return (
@@ -99,13 +100,17 @@ function BudgetForm({
     >
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Category</span>
-        <input
-          required
+        <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          placeholder="Groceries"
           className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
-        />
+        >
+          {EXPENSE_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
         <span className="text-xs text-muted">
           Setting a limit for a category you already budget for updates it, not a duplicate.
         </span>

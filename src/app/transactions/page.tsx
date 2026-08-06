@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { useAccounts, useCreateTransaction, useDeleteTransaction, useTransactions } from "~/lib/queries";
 import { formatMoney, formatDate } from "~/lib/format";
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, type TransactionType } from "~/lib/categories";
 
 export default function TransactionsPage() {
   const { data: accounts } = useAccounts();
@@ -133,19 +134,30 @@ function AddTransactionForm({
 }) {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [description, setDescription] = useState("");
+  // Expense, not income, is the overwhelmingly common case -- default
+  // to the one that needs fewer taps for the typical transaction.
+  const [type, setType] = useState<TransactionType>("expense");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<string>(EXPENSE_CATEGORIES[0]);
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
+
+  const categoryOptions = type === "expense" ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        // The sign lives here, derived from the type toggle -- not
+        // something the person typing the amount has to remember. The
+        // previous version required manually prefixing a minus sign
+        // for expenses; forgetting it (the easy, common mistake) meant
+        // every expense silently posted as income.
+        const magnitude = Math.abs(Number(amount) || 0);
         onSubmit({
           account_id: accountId,
-          amount: Number(amount) || 0,
+          amount: type === "expense" ? -magnitude : magnitude,
           description,
-          category: category || undefined,
+          category,
           date,
         });
       }}
@@ -165,6 +177,31 @@ function AddTransactionForm({
           ))}
         </select>
       </label>
+
+      <div className="flex gap-2">
+        {(["expense", "income"] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => {
+              setType(t);
+              // Category list is type-scoped (Groceries makes no sense
+              // for income, Salary makes no sense for an expense) --
+              // switching type resets to that list's first option
+              // rather than leaving a stale, mismatched selection.
+              setCategory(t === "expense" ? EXPENSE_CATEGORIES[0] : INCOME_CATEGORIES[0]);
+            }}
+            className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              type === t
+                ? "border-navy bg-navy text-white"
+                : "border-border text-muted hover:border-navy"
+            }`}
+          >
+            {t === "expense" ? "Expense" : "Income"}
+          </button>
+        ))}
+      </div>
+
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Description</span>
         <input
@@ -176,25 +213,31 @@ function AddTransactionForm({
         />
       </label>
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Amount (negative for expenses)</span>
+        <span className="text-muted">Amount</span>
         <input
           required
           type="number"
           step="0.01"
+          min="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="-42.50"
+          placeholder="42.50"
           className="rounded-lg border border-border px-3 py-2 font-mono outline-none focus:border-gold"
         />
       </label>
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Category (optional)</span>
-        <input
+        <span className="text-muted">Category</span>
+        <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          placeholder="Groceries"
           className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
-        />
+        >
+          {categoryOptions.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
       </label>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Date</span>
