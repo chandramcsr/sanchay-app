@@ -1,10 +1,12 @@
 import "~/styles/globals.css";
 
-import { ClerkProvider, Show, SignInButton, UserButton } from "@clerk/nextjs";
+import { ClerkProvider, Show, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 import { type Metadata } from "next";
 
 import { QueryProvider } from "~/components/query-provider";
 import { NavLinks } from "~/components/nav-links";
+import { Logo } from "~/components/logo";
 
 export const metadata: Metadata = {
   title: "Sanchay",
@@ -16,22 +18,39 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: "#1C2541",
+          colorBackground: "#FFFFFF",
+          colorForeground: "#1C2541",
+          colorMutedForeground: "#6B7280",
+          colorInput: "#FFFFFF",
+          colorInputForeground: "#1C2541",
+          fontFamily: "var(--font-sans)",
+          borderRadius: "0.75rem",
+        },
+      }}
+    >
       <html lang="en">
         <body className="font-sans">
-          <header className="flex items-center justify-between bg-navy px-6 py-4 text-white">
+          <header className="flex items-center justify-between bg-navy px-6 py-3 text-white">
             <div className="flex items-center gap-8">
-              <span className="font-display text-lg font-bold tracking-tight">Sanchay</span>
+              <Link href="/" className="flex items-center gap-2">
+                <Logo size={32} />
+                <span className="font-display text-lg font-bold tracking-tight">Sanchay</span>
+              </Link>
               <Show when="signed-in">
                 <NavLinks />
               </Show>
             </div>
             <Show when="signed-out">
-              <SignInButton>
-                <button className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-navy transition hover:opacity-90">
-                  Sign in
-                </button>
-              </SignInButton>
+              <Link
+                href="/sign-in"
+                className="rounded-lg bg-gold px-4 py-2 text-sm font-medium text-navy transition hover:opacity-90"
+              >
+                Sign in
+              </Link>
             </Show>
             <Show when="signed-in">
               <UserButton />
