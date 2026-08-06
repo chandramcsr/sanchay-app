@@ -108,12 +108,9 @@ export default function TransactionsPage() {
           management (create/edit/delete, end dates). */}
       {recurringRules && recurringRules.length > 0 && (
         <div className="rounded-2xl bg-card border border-border px-5 py-4">
-          <div className="flex items-center justify-between">
-            <div className="font-display text-lg font-bold text-navy">Recurring</div>
-            <Link href="/recurring" className="text-sm font-medium text-navy underline decoration-gold underline-offset-4">
-              Manage
-            </Link>
-          </div>
+          <Link href="/recurring" className="font-display text-lg font-bold text-navy hover:text-gold">
+            Recurring
+          </Link>
           <div className="mt-2 flex flex-col divide-y divide-border">
             {recurringRules.slice(0, 3).map((r) => (
               <div key={r.id} className="flex items-center justify-between py-2.5">

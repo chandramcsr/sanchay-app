@@ -2,25 +2,17 @@
 
 import { useState } from "react";
 
-import { useAccounts, useCreateRecurringRule, useDeleteRecurringRule, useRecurringRules } from "~/lib/queries";
+import { useAccounts, useDeleteRecurringRule, useRecurringRules, useUpdateRecurringRule } from "~/lib/queries";
 import { formatMoney, formatDate } from "~/lib/format";
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, type TransactionType } from "~/lib/categories";
-import type { RecurringFrequency } from "~/lib/types";
-
-const FREQUENCY_LABELS: Record<RecurringFrequency, string> = {
-  weekly: "Weekly",
-  biweekly: "Every 2 weeks",
-  monthly: "Monthly",
-  quarterly: "Every 3 months",
-  yearly: "Yearly",
-};
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, categoryIcon, FREQUENCY_LABELS, type TransactionType } from "~/lib/categories";
+import type { RecurringFrequency, RecurringRule } from "~/lib/types";
 
 export default function RecurringPage() {
   const { data: accounts } = useAccounts();
   const { data: rules, isLoading, isError } = useRecurringRules();
-  const createRule = useCreateRecurringRule();
+  const updateRule = useUpdateRecurringRule();
   const deleteRule = useDeleteRecurringRule();
-  const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const accountName = (id: string) => accounts?.find((a) => a.id === id)?.name ?? "—";
 
@@ -30,122 +22,116 @@ export default function RecurringPage() {
         <h1 className="font-display text-2xl font-bold text-navy">Recurring</h1>
         <p className="mt-1 text-sm text-muted">
           Rent, subscriptions, paychecks — anything on a schedule. Due occurrences are added as real
-          transactions automatically next time you open the app.
+          transactions automatically next time you open the app. To add a new one, use the + button and set
+          Repeats.
         </p>
       </div>
 
-      {!accounts || accounts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border px-6 py-10 text-center">
-          <p className="text-navy">No accounts yet.</p>
-          <p className="mt-1 text-sm text-muted">Add an account first, then set up a recurring transaction.</p>
+      {isError && (
+        <div className="rounded-xl border border-negative/30 bg-negative/5 px-4 py-3 text-sm text-negative">
+          Couldn&apos;t load your recurring transactions. Check your connection and try again.
         </div>
-      ) : (
-        <>
-          {isError && (
-            <div className="rounded-xl border border-negative/30 bg-negative/5 px-4 py-3 text-sm text-negative">
-              Couldn&apos;t load your recurring transactions. Check your connection and try again.
-            </div>
-          )}
+      )}
 
-          {isLoading && <div className="text-sm text-muted">Loading…</div>}
+      {isLoading && <div className="text-sm text-muted">Loading…</div>}
 
-          {rules && rules.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border px-6 py-10 text-center">
-              <p className="text-navy">Nothing recurring yet.</p>
-              <p className="mt-1 text-sm text-muted">Set one up below.</p>
-            </div>
-          )}
+      {rules && rules.length === 0 && (
+        <div className="rounded-2xl border border-dashed border-border px-6 py-10 text-center">
+          <p className="text-navy">Nothing recurring yet.</p>
+          <p className="mt-1 text-sm text-muted">Use the + button and set Repeats to create one.</p>
+        </div>
+      )}
 
-          {rules && rules.length > 0 && (
-            <div className="flex flex-col gap-2">
-              {rules.map((r) => (
-                <div
-                  key={r.id}
-                  className="flex items-center justify-between rounded-xl bg-card border border-border px-5 py-4"
-                >
+      {rules && rules.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {rules.map((r) =>
+            editingId === r.id ? (
+              <EditRecurringForm
+                key={r.id}
+                rule={r}
+                onCancel={() => setEditingId(null)}
+                onSubmit={(input) => {
+                  updateRule.mutate({ id: r.id, ...input }, { onSuccess: () => setEditingId(null) });
+                }}
+                submitting={updateRule.isPending}
+                error={updateRule.isError ? "Couldn't save that. Try again." : null}
+              />
+            ) : (
+              <div
+                key={r.id}
+                className="flex items-center justify-between rounded-xl bg-card border border-border px-5 py-4"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl" aria-hidden="true">
+                    {categoryIcon(r.category)}
+                  </span>
                   <div>
                     <div className="font-medium text-navy">{r.description}</div>
                     <div className="text-xs text-muted">
-                      {accountName(r.account_id)} · {FREQUENCY_LABELS[r.frequency]} · since{" "}
+                      {accountName(r.account_id)} · {FREQUENCY_LABELS[r.frequency] ?? r.frequency} · since{" "}
                       {formatDate(r.start_date)}
                       {r.category && ` · ${r.category}`}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`font-mono tabular-nums ${r.amount < 0 ? "text-negative" : "text-positive"}`}
-                    >
-                      {r.amount >= 0 ? "+" : ""}
-                      {formatMoney(r.amount)}
-                    </div>
-                    <button
-                      onClick={() => deleteRule.mutate(r.id)}
-                      disabled={deleteRule.isPending}
-                      className="text-xs text-muted transition hover:text-negative disabled:opacity-50"
-                      aria-label={`Delete ${r.description}`}
-                    >
-                      Delete
-                    </button>
-                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center gap-3">
+                  <div className={`font-mono tabular-nums ${r.amount < 0 ? "text-negative" : "text-positive"}`}>
+                    {r.amount >= 0 ? "+" : ""}
+                    {formatMoney(r.amount)}
+                  </div>
+                  <button
+                    onClick={() => setEditingId(r.id)}
+                    className="text-xs font-medium text-navy underline decoration-gold underline-offset-4"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteRule.mutate(r.id)}
+                    disabled={deleteRule.isPending}
+                    className="text-xs text-muted transition hover:text-negative disabled:opacity-50"
+                    aria-label={`Delete ${r.description}`}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ),
           )}
-
-          {formOpen ? (
-            <AddRecurringForm
-              accounts={accounts}
-              onCancel={() => setFormOpen(false)}
-              onSubmit={(input) => {
-                createRule.mutate(input, { onSuccess: () => setFormOpen(false) });
-              }}
-              submitting={createRule.isPending}
-              error={createRule.isError ? "Couldn't save that. Try again." : null}
-            />
-          ) : (
-            <button
-              onClick={() => setFormOpen(true)}
-              className="rounded-xl border border-border bg-card px-5 py-3 text-sm font-medium text-navy transition hover:border-gold"
-            >
-              + Add recurring transaction
-            </button>
-          )}
-        </>
+        </div>
       )}
     </div>
   );
 }
 
-function AddRecurringForm({
-  accounts,
+function EditRecurringForm({
+  rule,
   onCancel,
   onSubmit,
   submitting,
   error,
 }: {
-  accounts: { id: string; name: string }[];
+  rule: RecurringRule;
   onCancel: () => void;
   onSubmit: (input: {
-    account_id: string;
     amount: number;
     description: string;
     category?: string;
     frequency: RecurringFrequency;
-    start_date: string;
     end_date?: string;
   }) => void;
   submitting: boolean;
   error: string | null;
 }) {
-  const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
-  const [description, setDescription] = useState("");
-  const [type, setType] = useState<TransactionType>("expense");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<string>(EXPENSE_CATEGORIES[0]);
-  const [frequency, setFrequency] = useState<RecurringFrequency>("monthly");
-  const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [hasEndDate, setHasEndDate] = useState(false);
-  const [endDate, setEndDate] = useState("");
+  // account_id and start_date aren't editable here (see
+  // RecurringRuleUpdateInput) -- changing either would mean re-deriving
+  // the whole occurrence schedule from scratch, not a simple field edit.
+  const [type, setType] = useState<TransactionType>(rule.amount < 0 ? "expense" : "income");
+  const [amount, setAmount] = useState(String(Math.abs(rule.amount)));
+  const [description, setDescription] = useState(rule.description);
+  const [category, setCategory] = useState<string>(rule.category ?? EXPENSE_CATEGORIES[0]);
+  const [frequency, setFrequency] = useState<RecurringFrequency>(rule.frequency);
+  const [hasEndDate, setHasEndDate] = useState(!!rule.end_date);
+  const [endDate, setEndDate] = useState(rule.end_date ?? "");
 
   const categoryOptions = type === "expense" ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
 
@@ -155,32 +141,15 @@ function AddRecurringForm({
         e.preventDefault();
         const magnitude = Math.abs(Number(amount) || 0);
         onSubmit({
-          account_id: accountId,
           amount: type === "expense" ? -magnitude : magnitude,
           description,
           category,
           frequency,
-          start_date: startDate,
           end_date: hasEndDate && endDate ? endDate : undefined,
         });
       }}
-      className="flex flex-col gap-3 rounded-xl border border-border bg-card px-5 py-4"
+      className="flex flex-col gap-3 rounded-xl border border-gold bg-card px-5 py-4"
     >
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Account</span>
-        <select
-          value={accountId}
-          onChange={(e) => setAccountId(e.target.value)}
-          className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
-        >
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
       <div className="flex gap-2">
         {(["expense", "income"] as const).map((t) => (
           <button
@@ -205,7 +174,6 @@ function AddRecurringForm({
           required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Rent"
           className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
         />
       </label>
@@ -218,7 +186,6 @@ function AddRecurringForm({
           min="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="1500.00"
           className="rounded-lg border border-border px-3 py-2 font-mono outline-none focus:border-gold"
         />
       </label>
@@ -249,20 +216,6 @@ function AddRecurringForm({
             </option>
           ))}
         </select>
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Starts</span>
-        <input
-          required
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="rounded-lg border border-border px-3 py-2 font-mono outline-none focus:border-gold"
-        />
-        <span className="text-xs text-muted">
-          Anything due since this date gets added as real transactions right away — a schedule from years ago
-          catches up in full, not just from today.
-        </span>
       </label>
 
       <label className="flex items-center gap-2 text-sm">

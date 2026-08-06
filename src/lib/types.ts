@@ -87,3 +87,15 @@ export interface RecurringRuleCreateInput {
   start_date: string;
   end_date?: string;
 }
+
+// Mirrors app/schemas/recurring_rules.py's RecurringRuleUpdateRequest --
+// account_id and start_date are deliberately not editable (changing
+// either would mean re-deriving the whole occurrence schedule from
+// scratch), only these fields.
+export interface RecurringRuleUpdateInput {
+  amount?: number;
+  description?: string;
+  category?: string;
+  frequency?: RecurringFrequency;
+  end_date?: string;
+}

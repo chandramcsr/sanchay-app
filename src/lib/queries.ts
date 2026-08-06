@@ -12,6 +12,7 @@ import type {
   BudgetUpsertInput,
   RecurringRule,
   RecurringRuleCreateInput,
+  RecurringRuleUpdateInput,
   Transaction,
   TransactionCreateInput,
 } from "~/lib/types";
@@ -153,6 +154,16 @@ export function useCreateRecurringRule() {
       // accounts/transactions yet here, only once that next fetch
       // actually runs.
     },
+  });
+}
+
+export function useUpdateRecurringRule() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: RecurringRuleUpdateInput & { id: string }) =>
+      apiRequest<RecurringRule>(`/recurring-rules/${id}`, getToken, { method: "PUT", body: JSON.stringify(input) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["recurring-rules"] }),
   });
 }
 
