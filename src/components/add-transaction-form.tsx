@@ -105,22 +105,35 @@ export function AddTransactionForm({
         ))}
       </div>
 
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Amount</span>
-        <div className="flex items-center gap-1 rounded-lg border border-border px-3 py-2 focus-within:border-gold">
-          <span className="font-mono text-lg text-muted">$</span>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-muted">Amount</span>
+          <div className="flex items-center gap-1 rounded-lg border border-border px-3 py-2 focus-within:border-gold">
+            <span className="font-mono text-lg text-muted">$</span>
+            <input
+              required
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              className="w-full border-none bg-transparent font-mono text-lg outline-none"
+            />
+          </div>
+        </label>
+
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-muted">Date</span>
           <input
             required
-            type="number"
-            step="0.01"
-            min="0.01"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0.00"
-            className="w-full border-none bg-transparent font-mono text-lg outline-none"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="rounded-lg border border-border px-3 py-2 font-mono outline-none focus:border-gold md:mt-[1px]"
           />
-        </div>
-      </label>
+        </label>
+      </div>
 
       <div className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Account</span>
@@ -206,17 +219,6 @@ export function AddTransactionForm({
           </p>
         )}
       </div>
-
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Date</span>
-        <input
-          required
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="rounded-lg border border-border px-3 py-2 font-mono outline-none focus:border-gold"
-        />
-      </label>
 
       {error && <p className="text-sm text-negative">{error}</p>}
 

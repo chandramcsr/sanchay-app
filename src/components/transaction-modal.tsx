@@ -43,7 +43,7 @@ export function TransactionModalProvider({ children }: { children: ReactNode }) 
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-2xl bg-card px-5 py-5 md:max-w-md md:rounded-2xl lg:max-w-lg"
+            className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-2xl bg-card px-5 py-5 sm:max-w-md sm:rounded-2xl sm:px-6 md:max-w-xl md:px-7 lg:max-w-2xl lg:px-8 lg:py-6 xl:max-w-3xl"
             style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
           >
             <div className="mb-3 flex items-center justify-between">
