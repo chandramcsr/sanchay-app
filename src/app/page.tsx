@@ -1,18 +1,14 @@
-import { Show } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
+  if (userId) redirect("/accounts");
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8">
-      <Show when="signed-out">
-        <p className="text-lg">Sign in to see your accounts.</p>
-      </Show>
-      <Show when="signed-in">
-        <p className="text-lg">
-          Signed in. Accounts/transactions/budgets views land here once
-          sanchay-api&apos;s server-authoritative branch has real endpoints
-          to call.
-        </p>
-      </Show>
-    </main>
+    <div className="flex flex-col items-center gap-3 py-16 text-center">
+      <h1 className="font-display text-3xl font-bold text-navy">Sanchay</h1>
+      <p className="text-muted">Sign in to see your accounts.</p>
+    </div>
   );
 }

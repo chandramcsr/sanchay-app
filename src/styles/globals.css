@@ -1,6 +1,36 @@
 @import "tailwindcss";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
 
+/*
+  Design tokens carried forward from ledger-app's established identity,
+  not invented fresh -- this is a rearchitecture of the same product,
+  not a new brand. Navy/cream/warm-gold, mono for every number, dates,
+  and amounts. Continuity here is the deliberate choice, not a default.
+*/
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+
+  --color-navy: #1c2541;
+  --color-navy-light: #3e5c76;
+  --color-cream: #f3f5f3;
+  --color-card: #ffffff;
+  --color-gold: #c9962b;
+  --color-muted: #6b7280;
+  --color-positive: #4c8c4a;
+  --color-negative: #b5482f;
+  --color-border: #e5e7eb;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-navy);
+  font-family: var(--font-sans);
 }
