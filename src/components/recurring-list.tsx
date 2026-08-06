@@ -7,7 +7,14 @@ import { formatMoney, formatDate } from "~/lib/format";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, categoryIcon, FREQUENCY_LABELS, type TransactionType } from "~/lib/categories";
 import type { RecurringFrequency, RecurringRule } from "~/lib/types";
 
-export default function RecurringPage() {
+/**
+ * Full recurring-rule list with inline Edit/Delete, shared so it can
+ * render directly on Activity instead of behind a separate /recurring
+ * page -- there was no real reason to make editing/deleting a rule a
+ * navigation away from where you'd naturally see it, the same way
+ * transactions get edited inline right where they're listed.
+ */
+export function RecurringList() {
   const { data: accounts } = useAccounts();
   const { data: rules, isLoading, isError } = useRecurringRules();
   const updateRule = useUpdateRecurringRule();
@@ -16,88 +23,71 @@ export default function RecurringPage() {
 
   const accountName = (id: string) => accounts?.find((a) => a.id === id)?.name ?? "—";
 
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-navy">Recurring</h1>
-        <p className="mt-1 text-sm text-muted">
-          Rent, subscriptions, paychecks — anything on a schedule. Due occurrences are added as real
-          transactions automatically next time you open the app. To add a new one, use the + button and set
-          Repeats.
-        </p>
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-negative/30 bg-negative/5 px-4 py-3 text-sm text-negative">
+        Couldn&apos;t load your recurring transactions. Check your connection and try again.
       </div>
+    );
+  }
 
-      {isError && (
-        <div className="rounded-xl border border-negative/30 bg-negative/5 px-4 py-3 text-sm text-negative">
-          Couldn&apos;t load your recurring transactions. Check your connection and try again.
-        </div>
-      )}
+  if (isLoading) return <div className="text-sm text-muted">Loading…</div>;
+  if (!rules || rules.length === 0) return null;
 
-      {isLoading && <div className="text-sm text-muted">Loading…</div>}
-
-      {rules && rules.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-border px-6 py-10 text-center">
-          <p className="text-navy">Nothing recurring yet.</p>
-          <p className="mt-1 text-sm text-muted">Use the + button and set Repeats to create one.</p>
-        </div>
-      )}
-
-      {rules && rules.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {rules.map((r) =>
-            editingId === r.id ? (
-              <EditRecurringForm
-                key={r.id}
-                rule={r}
-                onCancel={() => setEditingId(null)}
-                onSubmit={(input) => {
-                  updateRule.mutate({ id: r.id, ...input }, { onSuccess: () => setEditingId(null) });
-                }}
-                submitting={updateRule.isPending}
-                error={updateRule.isError ? "Couldn't save that. Try again." : null}
-              />
-            ) : (
-              <div
-                key={r.id}
-                className="flex items-center justify-between rounded-xl bg-card border border-border px-5 py-4"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl" aria-hidden="true">
-                    {categoryIcon(r.category)}
-                  </span>
-                  <div>
-                    <div className="font-medium text-navy">{r.description}</div>
-                    <div className="text-xs text-muted">
-                      {accountName(r.account_id)} · {FREQUENCY_LABELS[r.frequency] ?? r.frequency} · since{" "}
-                      {formatDate(r.start_date)}
-                      {r.category && ` · ${r.category}`}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className={`font-mono tabular-nums ${r.amount < 0 ? "text-negative" : "text-positive"}`}>
-                    {r.amount >= 0 ? "+" : ""}
-                    {formatMoney(r.amount)}
-                  </div>
-                  <button
-                    onClick={() => setEditingId(r.id)}
-                    className="text-xs font-medium text-navy underline decoration-gold underline-offset-4"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => deleteRule.mutate(r.id)}
-                    disabled={deleteRule.isPending}
-                    className="text-xs text-muted transition hover:text-negative disabled:opacity-50"
-                    aria-label={`Delete ${r.description}`}
-                  >
-                    Delete
-                  </button>
+  return (
+    <div className="flex flex-col gap-2">
+      {rules.map((r) =>
+        editingId === r.id ? (
+          <EditRecurringForm
+            key={r.id}
+            rule={r}
+            onCancel={() => setEditingId(null)}
+            onSubmit={(input) => {
+              updateRule.mutate({ id: r.id, ...input }, { onSuccess: () => setEditingId(null) });
+            }}
+            submitting={updateRule.isPending}
+            error={updateRule.isError ? "Couldn't save that. Try again." : null}
+          />
+        ) : (
+          <div
+            key={r.id}
+            className="flex items-center justify-between rounded-xl bg-card border border-border px-5 py-4"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-xl" aria-hidden="true">
+                {categoryIcon(r.category)}
+              </span>
+              <div>
+                <div className="font-medium text-navy">{r.description}</div>
+                <div className="text-xs text-muted">
+                  {accountName(r.account_id)} · {FREQUENCY_LABELS[r.frequency] ?? r.frequency} · since{" "}
+                  {formatDate(r.start_date)}
+                  {r.category && ` · ${r.category}`}
                 </div>
               </div>
-            ),
-          )}
-        </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`font-mono tabular-nums ${r.amount < 0 ? "text-negative" : "text-positive"}`}>
+                {r.amount >= 0 ? "+" : ""}
+                {formatMoney(r.amount)}
+              </div>
+              <button
+                onClick={() => setEditingId(r.id)}
+                className="text-xs font-medium text-navy underline decoration-gold underline-offset-4"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => deleteRule.mutate(r.id)}
+                disabled={deleteRule.isPending}
+                className="text-xs text-muted transition hover:text-negative disabled:opacity-50"
+                aria-label={`Delete ${r.description}`}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ),
       )}
     </div>
   );

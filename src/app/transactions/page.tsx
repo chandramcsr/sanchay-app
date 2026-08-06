@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
 import { useAccounts, useDeleteTransaction, useRecurringRules, useTransactions, useUpdateTransaction } from "~/lib/queries";
 import { formatMoney, formatDate } from "~/lib/format";
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, categoryIcon, FREQUENCY_LABELS, type TransactionType } from "~/lib/categories";
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, categoryIcon, type TransactionType } from "~/lib/categories";
+import { RecurringList } from "~/components/recurring-list";
 import type { Transaction } from "~/lib/types";
 
 export default function TransactionsPage() {
@@ -24,39 +24,16 @@ export default function TransactionsPage() {
   const hasTransactions = !!transactions && transactions.length > 0;
   const hasRecurring = !!recurringRules && recurringRules.length > 0;
 
-  // Real content, not a bare link -- transactions post automatically
-  // based on frequency (see materialize_due_transactions), so there's
-  // nothing to "log" here day to day; this is a status view of what's
-  // scheduled, with a link to /recurring for actual management
-  // (create/edit/delete, end dates). Positioned above the "no
-  // transactions yet" empty state when there aren't any yet, instead
-  // of always sitting below it -- with nothing else on the page, this
-  // is the more useful thing to see first, not buried under an empty
-  // placeholder.
+  // Full list with inline Edit/Delete, right here -- no separate page
+  // for this, same reasoning as transactions themselves being edited
+  // inline where they're listed rather than a navigation away.
+  // Positioned above the "no transactions yet" empty state when there
+  // aren't any yet, instead of always sitting below it -- with nothing
+  // else on the page, this is the more useful thing to see first.
   const recurringSection = hasRecurring ? (
-    <div className="rounded-2xl bg-card border border-border px-5 py-4">
-      <Link href="/recurring" className="font-display text-lg font-bold text-navy hover:text-gold">
-        Recurring
-      </Link>
-      <div className="mt-2 flex flex-col divide-y divide-border">
-        {recurringRules.slice(0, 3).map((r) => (
-          <div key={r.id} className="flex items-center justify-between py-2.5">
-            <div className="flex items-center gap-3">
-              <span className="text-xl" aria-hidden="true">
-                {categoryIcon(r.category)}
-              </span>
-              <div>
-                <div className="text-sm font-medium text-navy">{r.description}</div>
-                <div className="text-xs text-muted">{FREQUENCY_LABELS[r.frequency] ?? r.frequency}</div>
-              </div>
-            </div>
-            <div className={`font-mono text-sm tabular-nums ${r.amount < 0 ? "text-negative" : "text-positive"}`}>
-              {r.amount >= 0 ? "+" : ""}
-              {formatMoney(r.amount)}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="flex flex-col gap-3">
+      <h2 className="font-display text-lg font-bold text-navy">Recurring</h2>
+      <RecurringList />
     </div>
   ) : null;
 
