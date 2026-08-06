@@ -48,6 +48,17 @@ export interface TransactionCreateInput {
   date: string;
 }
 
+// Mirrors app/schemas/transactions.py's TransactionUpdateRequest --
+// account_id isn't editable here either, same reasoning as recurring
+// rules: moving a transaction to a different account is a genuinely
+// different operation than editing its details.
+export interface TransactionUpdateInput {
+  amount?: number;
+  description?: string;
+  category?: string;
+  date?: string;
+}
+
 export interface Budget {
   id: string;
   category: string;

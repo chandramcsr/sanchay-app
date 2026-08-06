@@ -15,6 +15,7 @@ import type {
   RecurringRuleUpdateInput,
   Transaction,
   TransactionCreateInput,
+  TransactionUpdateInput,
 } from "~/lib/types";
 
 // One shared getToken-bound request function per component render --
@@ -88,6 +89,21 @@ export function useCreateTransaction() {
       // current_balance (computed server-side from the transaction
       // sum) -- both caches need invalidating, not just the one the
       // mutation directly touched.
+      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      void queryClient.invalidateQueries({ queryKey: ["accounts"] });
+    },
+  });
+}
+
+export function useUpdateTransaction() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: TransactionUpdateInput & { id: string }) =>
+      apiRequest<Transaction>(`/transactions/${id}`, getToken, { method: "PUT", body: JSON.stringify(input) }),
+    onSuccess: () => {
+      // An edited amount changes the account's current_balance too --
+      // same invalidation as delete, not just the transactions list.
       void queryClient.invalidateQueries({ queryKey: ["transactions"] });
       void queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
