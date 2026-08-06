@@ -62,11 +62,16 @@ export function useDeleteAccount() {
   });
 }
 
-export function useTransactions(params?: { accountId?: string }) {
+export function useTransactions(params?: { accountId?: string; startDate?: string; endDate?: string; limit?: number }) {
   const { getToken } = useAuth();
-  const search = params?.accountId ? `?account_id=${params.accountId}` : "";
+  const query = new URLSearchParams();
+  if (params?.accountId) query.set("account_id", params.accountId);
+  if (params?.startDate) query.set("start_date", params.startDate);
+  if (params?.endDate) query.set("end_date", params.endDate);
+  if (params?.limit) query.set("limit", String(params.limit));
+  const search = query.toString() ? `?${query.toString()}` : "";
   return useQuery({
-    queryKey: ["transactions", params?.accountId ?? "all"],
+    queryKey: ["transactions", params?.accountId ?? "all", params?.startDate ?? "", params?.endDate ?? "", params?.limit ?? ""],
     queryFn: () => apiRequest<Transaction[]>(`/transactions${search}`, getToken),
   });
 }
