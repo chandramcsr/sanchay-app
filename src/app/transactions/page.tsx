@@ -1,12 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 import { useAccounts, useCreateTransaction, useDeleteTransaction, useTransactions } from "~/lib/queries";
 import { formatMoney, formatDate } from "~/lib/format";
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, type TransactionType } from "~/lib/categories";
+import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, categoryIcon, type TransactionType } from "~/lib/categories";
 
+// useSearchParams() requires a Suspense boundary above it in the App
+// Router (Next.js bails out of static generation without one) --
+// split into a thin wrapper + the real page content, rather than
+// dropping the ?new=true handling to work around it.
 export default function TransactionsPage() {
+  return (
+    <Suspense fallback={<div className="text-sm text-muted">Loading…</div>}>
+      <TransactionsPageContent />
+    </Suspense>
+  );
+}
+
+function TransactionsPageContent() {
   const { data: accounts } = useAccounts();
   const [accountFilter, setAccountFilter] = useState<string>("all");
   const { data: transactions, isLoading, isError } = useTransactions(
@@ -16,27 +30,38 @@ export default function TransactionsPage() {
   const deleteTransaction = useDeleteTransaction();
   const [formOpen, setFormOpen] = useState(false);
 
+  // The nav FAB links here with ?new=true to open the add-transaction
+  // form immediately -- "add a transaction from anywhere" without a
+  // second, parallel form implementation living outside this page.
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("new") === "true") setFormOpen(true);
+  }, [searchParams]);
+
   const accountName = (id: string) => accounts?.find((a) => a.id === id)?.name ?? "—";
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-bold text-navy">Transactions</h1>
-        {accounts && accounts.length > 0 && (
-          <select
-            value={accountFilter}
-            onChange={(e) => setAccountFilter(e.target.value)}
-            className="rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-gold"
-          >
-            <option value="all">All accounts</option>
-            {accounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        )}
+        <h1 className="font-display text-2xl font-bold text-navy">Activity</h1>
+        <Link href="/recurring" className="text-sm font-medium text-navy underline decoration-gold underline-offset-4">
+          Recurring
+        </Link>
       </div>
+      {accounts && accounts.length > 0 && (
+        <select
+          value={accountFilter}
+          onChange={(e) => setAccountFilter(e.target.value)}
+          className="self-start rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-gold"
+        >
+          <option value="all">All accounts</option>
+          {accounts.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
+          ))}
+        </select>
+      )}
 
       {!accounts || accounts.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border px-6 py-10 text-center">
@@ -67,11 +92,16 @@ export default function TransactionsPage() {
                   key={t.id}
                   className="flex items-center justify-between rounded-xl bg-card border border-border px-5 py-3"
                 >
-                  <div>
-                    <div className="font-medium text-navy">{t.description}</div>
-                    <div className="text-xs text-muted">
-                      {accountName(t.account_id)} · {formatDate(t.date)}
-                      {t.category && ` · ${t.category}`}
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl" aria-hidden="true">
+                      {categoryIcon(t.category)}
+                    </span>
+                    <div>
+                      <div className="font-medium text-navy">{t.description}</div>
+                      <div className="text-xs text-muted">
+                        {accountName(t.account_id)} · {formatDate(t.date)}
+                        {t.category && ` · ${t.category}`}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
