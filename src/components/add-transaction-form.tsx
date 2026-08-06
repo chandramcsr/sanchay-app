@@ -2,64 +2,90 @@
 
 import { useState } from "react";
 
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, type TransactionType } from "~/lib/categories";
+import { EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS, type TransactionType } from "~/lib/categories";
+import { ACCOUNT_TYPE_ICONS } from "~/lib/format";
+import type { AccountType, RecurringFrequency } from "~/lib/types";
+
+const REPEATS_OPTIONS: { value: "never" | RecurringFrequency; label: string }[] = [
+  { value: "never", label: "Never" },
+  { value: "weekly", label: "Weekly" },
+  { value: "biweekly", label: "Every 2 weeks" },
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "yearly", label: "Yearly" },
+];
+
+// How many category pills show before the "More" expander -- matches
+// the reference's 8-visible-plus-expandable layout.
+const VISIBLE_CATEGORY_COUNT = 8;
 
 export function AddTransactionForm({
   accounts,
+  onSubmitTransaction,
+  onSubmitRecurring,
   onCancel,
-  onSubmit,
   submitting,
   error,
 }: {
-  accounts: { id: string; name: string }[];
+  accounts: { id: string; name: string; type: AccountType }[];
+  onSubmitTransaction: (input: {
+    account_id: string;
+    amount: number;
+    description: string;
+    category?: string;
+    date: string;
+  }) => void;
+  onSubmitRecurring: (input: {
+    account_id: string;
+    amount: number;
+    description: string;
+    category?: string;
+    frequency: RecurringFrequency;
+    start_date: string;
+  }) => void;
   onCancel: () => void;
-  onSubmit: (input: { account_id: string; amount: number; description: string; category?: string; date: string }) => void;
   submitting: boolean;
   error: string | null;
 }) {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
-  const [description, setDescription] = useState("");
-  // Expense, not income, is the overwhelmingly common case -- default
-  // to the one that needs fewer taps for the typical transaction.
   const [type, setType] = useState<TransactionType>("expense");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<string>(EXPENSE_CATEGORIES[0]);
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<string>(EXPENSE_CATEGORY_DEFS[0]!.name);
+  const [showMoreCategories, setShowMoreCategories] = useState(false);
+  const [repeats, setRepeats] = useState<"never" | RecurringFrequency>("never");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
 
-  const categoryOptions = type === "expense" ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+  const categoryDefs = type === "expense" ? EXPENSE_CATEGORY_DEFS : INCOME_CATEGORY_DEFS;
+  const visibleCategories = showMoreCategories ? categoryDefs : categoryDefs.slice(0, VISIBLE_CATEGORY_COUNT);
+  const hiddenCount = categoryDefs.length - VISIBLE_CATEGORY_COUNT;
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        // The sign lives here, derived from the type toggle -- not
-        // something the person typing the amount has to remember.
         const magnitude = Math.abs(Number(amount) || 0);
-        onSubmit({
-          account_id: accountId,
-          amount: type === "expense" ? -magnitude : magnitude,
-          description,
-          category,
-          date,
-        });
+        const signedAmount = type === "expense" ? -magnitude : magnitude;
+        if (repeats === "never") {
+          onSubmitTransaction({ account_id: accountId, amount: signedAmount, description, category, date });
+        } else {
+          // A schedule, not a one-time entry -- the first occurrence
+          // materializes into a real transaction automatically next
+          // time the app loads data (see materialize_due_transactions
+          // on the backend), same as any other recurring rule. No
+          // separate one-off transaction is created here alongside it.
+          onSubmitRecurring({
+            account_id: accountId,
+            amount: signedAmount,
+            description,
+            category,
+            frequency: repeats,
+            start_date: date,
+          });
+        }
       }}
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-4"
     >
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Account</span>
-        <select
-          value={accountId}
-          onChange={(e) => setAccountId(e.target.value)}
-          className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
-        >
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
       <div className="flex gap-2">
         {(["expense", "income"] as const).map((t) => (
           <button
@@ -67,12 +93,10 @@ export function AddTransactionForm({
             type="button"
             onClick={() => {
               setType(t);
-              // Category list is type-scoped -- switching type resets
-              // to that list's first option rather than leaving a
-              // stale, mismatched selection.
-              setCategory(t === "expense" ? EXPENSE_CATEGORIES[0] : INCOME_CATEGORIES[0]);
+              setCategory(t === "expense" ? EXPENSE_CATEGORY_DEFS[0]!.name : INCOME_CATEGORY_DEFS[0]!.name);
+              setShowMoreCategories(false);
             }}
-            className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+            className={`flex-1 rounded-lg border px-3 py-2.5 text-sm font-medium transition ${
               type === t ? "border-navy bg-navy text-white" : "border-border text-muted hover:border-navy"
             }`}
           >
@@ -82,42 +106,107 @@ export function AddTransactionForm({
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Description</span>
+        <span className="text-muted">Amount</span>
+        <div className="flex items-center gap-1 rounded-lg border border-border px-3 py-2 focus-within:border-gold">
+          <span className="font-mono text-lg text-muted">$</span>
+          <input
+            required
+            type="number"
+            step="0.01"
+            min="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+            className="w-full border-none bg-transparent font-mono text-lg outline-none"
+          />
+        </div>
+      </label>
+
+      <div className="flex flex-col gap-1 text-sm">
+        <span className="text-muted">Account</span>
+        <div className="flex flex-wrap gap-2">
+          {accounts.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => setAccountId(a.id)}
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                accountId === a.id
+                  ? "border-navy bg-navy text-white"
+                  : "border-border text-navy hover:border-gold"
+              }`}
+            >
+              <span aria-hidden="true">{ACCOUNT_TYPE_ICONS[a.type] ?? "🏦"}</span>
+              {a.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="text-muted">Note (optional)</span>
         <input
-          required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Groceries"
+          placeholder="e.g. Whole Foods run"
           className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Amount</span>
-        <input
-          required
-          type="number"
-          step="0.01"
-          min="0.01"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="42.50"
-          className="rounded-lg border border-border px-3 py-2 font-mono outline-none focus:border-gold"
-        />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
+
+      <div className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Category</span>
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
-        >
-          {categoryOptions.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
+        <div className="flex flex-wrap gap-2">
+          {visibleCategories.map((c) => (
+            <button
+              key={c.name}
+              type="button"
+              onClick={() => setCategory(c.name)}
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                category === c.name ? "border-navy bg-navy text-white" : "border-border text-navy hover:border-gold"
+              }`}
+            >
+              <span aria-hidden="true">{c.icon}</span>
+              {c.name}
+            </button>
           ))}
-        </select>
-      </label>
+          {!showMoreCategories && hiddenCount > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowMoreCategories(true)}
+              className="rounded-full border border-dashed border-border px-3 py-1.5 text-sm font-medium text-muted transition hover:border-gold"
+            >
+              More ▾ ({hiddenCount})
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1 text-sm">
+        <span className="text-muted">Repeats</span>
+        <div className="flex flex-wrap gap-2">
+          {REPEATS_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setRepeats(opt.value)}
+              className={`rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                repeats === opt.value
+                  ? "border-navy bg-navy text-white"
+                  : "border-border text-navy hover:border-gold"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        {repeats !== "never" && (
+          <p className="mt-1 text-xs text-muted">
+            Creates a schedule starting on the date below -- due occurrences are added automatically, they
+            don&apos;t need to be logged one by one.
+          </p>
+        )}
+      </div>
+
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Date</span>
         <input
@@ -135,14 +224,14 @@ export function AddTransactionForm({
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-lg bg-navy px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+          className="flex-1 rounded-lg bg-navy px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
         >
-          {submitting ? "Logging…" : "Log transaction"}
+          {submitting ? "Saving…" : "Save transaction"}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-muted transition hover:text-navy"
+          className="rounded-lg px-4 py-3 text-sm font-medium text-muted transition hover:text-navy"
         >
           Cancel
         </button>

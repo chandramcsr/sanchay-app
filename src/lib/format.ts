@@ -23,3 +23,14 @@ export const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   loan: "Loan",
   investment: "Investment",
 };
+
+// No per-account custom icon exists in the data model (Account only
+// stores a type) -- this is a reasonable stand-in keyed off type,
+// not a real per-account setting.
+export const ACCOUNT_TYPE_ICONS: Record<string, string> = {
+  checking: "🏦",
+  savings: "🐷",
+  credit_card: "💳",
+  loan: "🏦",
+  investment: "📈",
+};

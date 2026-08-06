@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode } from "react";
 
-import { useAccounts, useCreateTransaction } from "~/lib/queries";
+import { useAccounts, useCreateRecurringRule, useCreateTransaction } from "~/lib/queries";
 import { AddTransactionForm } from "~/components/add-transaction-form";
 
 const TransactionModalContext = createContext<{ open: () => void } | null>(null);
@@ -27,6 +27,11 @@ export function TransactionModalProvider({ children }: { children: ReactNode }) 
   const [isOpen, setIsOpen] = useState(false);
   const { data: accounts } = useAccounts();
   const createTransaction = useCreateTransaction();
+  const createRecurringRule = useCreateRecurringRule();
+
+  const submitting = createTransaction.isPending || createRecurringRule.isPending;
+  const error =
+    createTransaction.isError || createRecurringRule.isError ? "Couldn't save that. Try again." : null;
 
   return (
     <TransactionModalContext.Provider value={{ open: () => setIsOpen(true) }}>
@@ -38,11 +43,11 @@ export function TransactionModalProvider({ children }: { children: ReactNode }) 
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-t-2xl bg-card px-5 py-5 md:rounded-2xl"
+            className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-2xl bg-card px-5 py-5 md:rounded-2xl"
             style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
           >
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-display text-lg font-bold text-navy">Log transaction</h2>
+              <h2 className="font-display text-lg font-bold text-navy">New transaction</h2>
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Close"
@@ -60,11 +65,14 @@ export function TransactionModalProvider({ children }: { children: ReactNode }) 
               <AddTransactionForm
                 accounts={accounts}
                 onCancel={() => setIsOpen(false)}
-                onSubmit={(input) => {
+                onSubmitTransaction={(input) => {
                   createTransaction.mutate(input, { onSuccess: () => setIsOpen(false) });
                 }}
-                submitting={createTransaction.isPending}
-                error={createTransaction.isError ? "Couldn't log that transaction. Try again." : null}
+                onSubmitRecurring={(input) => {
+                  createRecurringRule.mutate(input, { onSuccess: () => setIsOpen(false) });
+                }}
+                submitting={submitting}
+                error={error}
               />
             )}
           </div>
