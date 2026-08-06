@@ -31,6 +31,14 @@ export const ACCOUNT_TYPE_ICONS: Record<string, string> = {
   checking: "🏦",
   savings: "🐷",
   credit_card: "💳",
-  loan: "🏦",
+  loan: "🧾",
   investment: "📈",
 };
+
+// Matches ledger-app's isDebtAccountType exactly -- credit cards and
+// loans are the two account types this app's model treats as debt,
+// where a balance reads more naturally as a positive "amount owed"
+// than the signed negative it's actually stored as.
+export function isDebtAccountType(type: string): boolean {
+  return type === "credit_card" || type === "loan";
+}
