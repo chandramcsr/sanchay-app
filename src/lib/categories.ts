@@ -56,3 +56,11 @@ export function categoryIcon(name: string | null | undefined): string {
     "📦"
   );
 }
+
+export const FREQUENCY_LABELS: Record<string, string> = {
+  weekly: "Weekly",
+  biweekly: "Every 2 weeks",
+  monthly: "Monthly",
+  quarterly: "Every 3 months",
+  yearly: "Yearly",
+};

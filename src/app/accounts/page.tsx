@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import { useAccounts, useCreateAccount, useDeleteAccount } from "~/lib/queries";
+import { useAccounts, useBudgets, useCreateAccount, useDeleteAccount } from "~/lib/queries";
 import { formatMoney, ACCOUNT_TYPE_LABELS } from "~/lib/format";
 import type { AccountType } from "~/lib/types";
 
@@ -11,6 +11,7 @@ const ACCOUNT_TYPES: AccountType[] = ["checking", "savings", "credit_card", "loa
 
 export default function AccountsPage() {
   const { data: accounts, isLoading, isError } = useAccounts();
+  const { data: budgets } = useBudgets();
   const createAccount = useCreateAccount();
   const deleteAccount = useDeleteAccount();
   const [formOpen, setFormOpen] = useState(false);
@@ -26,12 +27,47 @@ export default function AccountsPage() {
         </div>
       </div>
 
-      <Link
-        href="/budgets"
-        className="block rounded-xl border border-border bg-card px-4 py-3 text-center text-sm font-medium text-navy transition hover:border-gold"
-      >
-        Budgets
-      </Link>
+      {budgets && budgets.length > 0 && (
+        <div className="rounded-2xl bg-card border border-border px-5 py-4">
+          <div className="flex items-center justify-between">
+            <div className="font-display text-lg font-bold text-navy">Budgets</div>
+            <Link href="/budgets" className="text-sm font-medium text-navy underline decoration-gold underline-offset-4">
+              Manage
+            </Link>
+          </div>
+          <div className="mt-3 flex flex-col gap-3">
+            {budgets.slice(0, 3).map((b) => {
+              const pct = b.monthly_limit > 0 ? Math.min(b.spent / b.monthly_limit, 1) : 0;
+              const overBudget = b.spent > b.monthly_limit;
+              return (
+                <div key={b.id}>
+                  <div className="flex items-baseline justify-between text-sm">
+                    <span className="text-navy">{b.category}</span>
+                    <span className={`font-mono tabular-nums ${overBudget ? "text-negative" : "text-muted"}`}>
+                      {formatMoney(b.spent)} / {formatMoney(b.monthly_limit)}
+                    </span>
+                  </div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-cream">
+                    <div
+                      className={`h-full rounded-full ${overBudget ? "bg-negative" : "bg-gold"}`}
+                      style={{ width: `${pct * 100}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {(!budgets || budgets.length === 0) && (
+        <Link
+          href="/budgets"
+          className="block rounded-xl border border-dashed border-border px-4 py-3 text-center text-sm font-medium text-muted transition hover:border-gold hover:text-navy"
+        >
+          Set a budget to start tracking spending
+        </Link>
+      )}
 
       {isError && (
         <div className="rounded-xl border border-negative/30 bg-negative/5 px-4 py-3 text-sm text-negative">
