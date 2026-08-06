@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { useAccounts, useBudgets, useCreateAccount, useDeleteAccount } from "~/lib/queries";
-import { formatMoney, ACCOUNT_TYPE_LABELS } from "~/lib/format";
+import { formatMoney, ACCOUNT_TYPE_LABELS, isDebtAccountType, resolveStartingBalance } from "~/lib/format";
 import type { AccountType } from "~/lib/types";
 
 const ACCOUNT_TYPES: AccountType[] = ["checking", "savings", "credit_card", "loan", "investment"];
@@ -157,7 +157,12 @@ function AddAccountForm({
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ name, type, starting_balance: Number(startingBalance) || 0, currency: "USD" });
+        onSubmit({
+          name,
+          type,
+          starting_balance: resolveStartingBalance(type, Number(startingBalance) || 0),
+          currency: "USD",
+        });
       }}
       className="flex flex-col gap-3 rounded-xl border border-border bg-card px-5 py-4"
     >
@@ -186,14 +191,18 @@ function AddAccountForm({
         </select>
       </label>
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Starting balance</span>
+        <span className="text-muted">{isDebtAccountType(type) ? "Current amount owed" : "Starting balance"}</span>
         <input
           type="number"
           step="0.01"
+          min={isDebtAccountType(type) ? "0" : undefined}
           value={startingBalance}
           onChange={(e) => setStartingBalance(e.target.value)}
           className="rounded-lg border border-border px-3 py-2 font-mono outline-none focus:border-gold"
         />
+        {isDebtAccountType(type) && (
+          <span className="text-xs text-muted">Enter what you currently owe as a positive number — e.g. 500 for $500 owed.</span>
+        )}
       </label>
 
       {error && <p className="text-sm text-negative">{error}</p>}

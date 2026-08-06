@@ -42,3 +42,18 @@ export const ACCOUNT_TYPE_ICONS: Record<string, string> = {
 export function isDebtAccountType(type: string): boolean {
   return type === "credit_card" || type === "loan";
 }
+
+/**
+ * Matches ledger-app's resolveStartingBalance exactly. For a credit
+ * card or loan, the number someone types when adding the account is
+ * "how much do I currently owe" -- a real-world positive amount, not
+ * a signed figure they'd naturally think to negate themselves. Always
+ * stores it as negative (-Math.abs, not a bare negation) so even an
+ * accidental negative entry stays correctly normalized rather than
+ * flipping the wrong way. Every other account type stores the entered
+ * amount as-is.
+ */
+export function resolveStartingBalance(type: string, enteredAmount: number): number {
+  if (isDebtAccountType(type)) return enteredAmount === 0 ? 0 : -Math.abs(enteredAmount);
+  return enteredAmount;
+}
