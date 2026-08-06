@@ -100,7 +100,7 @@ export default function HomePage() {
                     {categoryIcon(t.category)}
                   </span>
                   <div>
-                    <div className="text-sm font-medium text-navy">{t.description}</div>
+                    <div className="text-sm font-medium text-navy">{t.description ?? t.category ?? "Transaction"}</div>
                     <div className="text-xs text-muted">
                       {t.category ?? "Uncategorized"} · {formatDate(t.date)}
                     </div>

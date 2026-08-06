@@ -104,7 +104,7 @@ export default function TransactionsPage() {
                         {categoryIcon(t.category)}
                       </span>
                       <div>
-                        <div className="font-medium text-navy">{t.description}</div>
+                        <div className="font-medium text-navy">{t.description ?? t.category ?? "Transaction"}</div>
                         <div className="text-xs text-muted">
                           {accountName(t.account_id)} · {formatDate(t.date)}
                           {t.category && ` · ${t.category}`}
@@ -128,7 +128,7 @@ export default function TransactionsPage() {
                         onClick={() => deleteTransaction.mutate(t.id)}
                         disabled={deleteTransaction.isPending}
                         className="text-xs text-muted transition hover:text-negative disabled:opacity-50"
-                        aria-label={`Delete ${t.description}`}
+                        aria-label={`Delete ${t.description ?? t.category ?? "transaction"}`}
                       >
                         Delete
                       </button>
@@ -155,7 +155,7 @@ function EditTransactionForm({
 }: {
   transaction: Transaction;
   onCancel: () => void;
-  onSubmit: (input: { amount: number; description: string; category?: string; date: string }) => void;
+  onSubmit: (input: { amount: number; description?: string; category?: string; date: string }) => void;
   submitting: boolean;
   error: string | null;
 }) {
@@ -164,7 +164,7 @@ function EditTransactionForm({
   // different operation than editing its details.
   const [type, setType] = useState<TransactionType>(transaction.amount < 0 ? "expense" : "income");
   const [amount, setAmount] = useState(String(Math.abs(transaction.amount)));
-  const [description, setDescription] = useState(transaction.description);
+  const [description, setDescription] = useState(transaction.description ?? "");
   const [category, setCategory] = useState<string>(transaction.category ?? EXPENSE_CATEGORIES[0]);
   const [date, setDate] = useState(transaction.date);
 
@@ -177,7 +177,7 @@ function EditTransactionForm({
         const magnitude = Math.abs(Number(amount) || 0);
         onSubmit({
           amount: type === "expense" ? -magnitude : magnitude,
-          description,
+          description: description.trim() || undefined,
           category,
           date,
         });
@@ -203,9 +203,8 @@ function EditTransactionForm({
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Description</span>
+        <span className="text-muted">Description (optional)</span>
         <input
-          required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"

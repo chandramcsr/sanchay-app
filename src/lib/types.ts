@@ -33,7 +33,7 @@ export interface Transaction {
   id: string;
   account_id: string;
   amount: number; // signed: positive = income/credit, negative = expense/debit
-  description: string;
+  description: string | null;
   category: string | null;
   date: string; // YYYY-MM-DD
   created_at: string;
@@ -43,7 +43,7 @@ export interface Transaction {
 export interface TransactionCreateInput {
   account_id: string;
   amount: number;
-  description: string;
+  description?: string;
   category?: string;
   date: string;
 }
@@ -79,7 +79,7 @@ export interface RecurringRule {
   id: string;
   account_id: string;
   amount: number;
-  description: string;
+  description: string | null;
   category: string | null;
   frequency: RecurringFrequency;
   start_date: string;
@@ -92,7 +92,7 @@ export interface RecurringRule {
 export interface RecurringRuleCreateInput {
   account_id: string;
   amount: number;
-  description: string;
+  description?: string;
   category?: string;
   frequency: RecurringFrequency;
   start_date: string;

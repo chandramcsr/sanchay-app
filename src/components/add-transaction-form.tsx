@@ -31,14 +31,14 @@ export function AddTransactionForm({
   onSubmitTransaction: (input: {
     account_id: string;
     amount: number;
-    description: string;
+    description?: string;
     category?: string;
     date: string;
   }) => void;
   onSubmitRecurring: (input: {
     account_id: string;
     amount: number;
-    description: string;
+    description?: string;
     category?: string;
     frequency: RecurringFrequency;
     start_date: string;
@@ -66,8 +66,22 @@ export function AddTransactionForm({
         e.preventDefault();
         const magnitude = Math.abs(Number(amount) || 0);
         const signedAmount = type === "expense" ? -magnitude : magnitude;
+        // description is genuinely optional now (backend column is
+        // nullable) -- send undefined when left blank so it actually
+        // stores as null, rather than silently substituting a value
+        // the person didn't type. Display-side, lists fall back to
+        // showing the category name for a null description (see
+        // categoryIcon/description fallbacks in the list views) --
+        // that's a rendering choice, not stored data.
+        const trimmedDescription = description.trim() || undefined;
         if (repeats === "never") {
-          onSubmitTransaction({ account_id: accountId, amount: signedAmount, description, category, date });
+          onSubmitTransaction({
+            account_id: accountId,
+            amount: signedAmount,
+            description: trimmedDescription,
+            category,
+            date,
+          });
         } else {
           // A schedule, not a one-time entry -- the first occurrence
           // materializes into a real transaction automatically next
@@ -77,7 +91,7 @@ export function AddTransactionForm({
           onSubmitRecurring({
             account_id: accountId,
             amount: signedAmount,
-            description,
+            description: trimmedDescription,
             category,
             frequency: repeats,
             start_date: date,

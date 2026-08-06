@@ -58,7 +58,7 @@ export function RecurringList() {
                 {categoryIcon(r.category)}
               </span>
               <div>
-                <div className="font-medium text-navy">{r.description}</div>
+                <div className="font-medium text-navy">{r.description ?? r.category ?? "Recurring transaction"}</div>
                 <div className="text-xs text-muted">
                   {accountName(r.account_id)} · {FREQUENCY_LABELS[r.frequency] ?? r.frequency} · since{" "}
                   {formatDate(r.start_date)}
@@ -81,7 +81,7 @@ export function RecurringList() {
                 onClick={() => deleteRule.mutate(r.id)}
                 disabled={deleteRule.isPending}
                 className="text-xs text-muted transition hover:text-negative disabled:opacity-50"
-                aria-label={`Delete ${r.description}`}
+                aria-label={`Delete ${r.description ?? r.category ?? "recurring transaction"}`}
               >
                 Delete
               </button>
@@ -104,7 +104,7 @@ function EditRecurringForm({
   onCancel: () => void;
   onSubmit: (input: {
     amount: number;
-    description: string;
+    description?: string;
     category?: string;
     frequency: RecurringFrequency;
     end_date?: string;
@@ -117,7 +117,7 @@ function EditRecurringForm({
   // the whole occurrence schedule from scratch, not a simple field edit.
   const [type, setType] = useState<TransactionType>(rule.amount < 0 ? "expense" : "income");
   const [amount, setAmount] = useState(String(Math.abs(rule.amount)));
-  const [description, setDescription] = useState(rule.description);
+  const [description, setDescription] = useState(rule.description ?? "");
   const [category, setCategory] = useState<string>(rule.category ?? EXPENSE_CATEGORIES[0]);
   const [frequency, setFrequency] = useState<RecurringFrequency>(rule.frequency);
   const [hasEndDate, setHasEndDate] = useState(!!rule.end_date);
@@ -132,7 +132,7 @@ function EditRecurringForm({
         const magnitude = Math.abs(Number(amount) || 0);
         onSubmit({
           amount: type === "expense" ? -magnitude : magnitude,
-          description,
+          description: description.trim() || undefined,
           category,
           frequency,
           end_date: hasEndDate && endDate ? endDate : undefined,
@@ -159,9 +159,8 @@ function EditRecurringForm({
       </div>
 
       <label className="flex flex-col gap-1 text-sm">
-        <span className="text-muted">Description</span>
+        <span className="text-muted">Description (optional)</span>
         <input
-          required
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
