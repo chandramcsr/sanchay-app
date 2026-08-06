@@ -6,6 +6,7 @@ import { type Metadata } from "next";
 
 import { QueryProvider } from "~/components/query-provider";
 import { AppNav } from "~/components/app-nav";
+import { TransactionModalProvider } from "~/components/transaction-modal";
 import { Logo } from "~/components/logo";
 
 export const metadata: Metadata = {
@@ -44,11 +45,13 @@ export default function RootLayout({
             </Show>
           </header>
           <QueryProvider>
-            <main className="mx-auto max-w-3xl px-6 py-8 pb-24 md:pb-8 md:pl-24">{children}</main>
+            <TransactionModalProvider>
+              <main className="mx-auto max-w-3xl px-6 py-8 pb-24 md:pb-8 md:pl-24">{children}</main>
+              <Show when="signed-in">
+                <AppNav />
+              </Show>
+            </TransactionModalProvider>
           </QueryProvider>
-          <Show when="signed-in">
-            <AppNav />
-          </Show>
         </body>
       </html>
     </ClerkProvider>

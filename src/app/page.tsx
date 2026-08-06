@@ -5,7 +5,7 @@ import { Logo } from "~/components/logo";
 
 export default async function Home() {
   const { userId } = await auth();
-  if (userId) redirect("/accounts");
+  if (userId) redirect("/home");
 
   return (
     <div className="flex flex-col items-center gap-10 py-20 text-center">

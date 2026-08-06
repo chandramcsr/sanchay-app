@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { ROUTES } from "~/components/nav-links";
+import { useTransactionModal } from "~/components/transaction-modal";
 
 /**
  * One nav component, two layouts -- matching ledger-app's actual
@@ -14,14 +15,13 @@ import { ROUTES } from "~/components/nav-links";
  * ledger-app's own CSS grid transform (bottom-nav becoming a sidebar
  * via grid-template-areas).
  *
- * The FAB navigates to /transactions?new=true rather than opening a
- * global modal -- TransactionsPage reads that query param and opens
- * its existing add-transaction form on mount. Keeps "add a
- * transaction from anywhere" without needing a second, parallel form
- * implementation living outside the Activity page.
+ * The FAB opens the global transaction modal (see transaction-modal.tsx)
+ * directly -- a real popup overlaying the current screen, not a
+ * navigation to a different page.
  */
 export function AppNav() {
   const pathname = usePathname();
+  const { open } = useTransactionModal();
   const [first, second, third] = ROUTES;
 
   const navLink = (route: (typeof ROUTES)[number]) => {
@@ -47,15 +47,15 @@ export function AppNav() {
     >
       {navLink(first)}
       {navLink(second)}
-      <Link
-        href="/transactions?new=true"
+      <button
+        onClick={open}
         aria-label="Add transaction"
         className="-mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white shadow-lg transition active:scale-95 md:mt-0"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
-      </Link>
+      </button>
       {navLink(third)}
     </nav>
   );
