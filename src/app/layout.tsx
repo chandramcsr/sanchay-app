@@ -35,10 +35,7 @@ export default function RootLayout({
     >
       <html lang="en">
         <body className="font-sans">
-          <header
-            className="sticky top-0 z-20 flex h-16 items-center justify-between bg-navy px-6 text-white"
-            style={{ transform: "translateZ(0)", willChange: "transform" }}
-          >
+          <header className="fixed inset-x-0 top-0 z-20 flex h-16 items-center justify-between bg-navy px-6 text-white">
             <Link href="/" className="flex items-center gap-2">
               <Logo size={32} />
               <span className="font-display text-lg font-bold tracking-tight">Sanchay</span>
@@ -49,7 +46,7 @@ export default function RootLayout({
           </header>
           <QueryProvider>
             <TransactionModalProvider>
-              <main className="mx-auto max-w-3xl px-6 py-8 pb-24 md:pb-8 md:pl-24">{children}</main>
+              <main className="mx-auto max-w-3xl px-6 pb-24 pt-24 md:pb-8 md:pl-24 md:pt-24">{children}</main>
               <Show when="signed-in">
                 <AppNav />
               </Show>
