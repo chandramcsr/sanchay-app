@@ -31,7 +31,7 @@ export function AppNav() {
         key={route.href}
         href={route.href}
         className={`flex flex-col items-center gap-0.5 px-3 py-1 text-xs font-medium transition ${
-          active ? "text-gold" : "text-muted"
+          active ? "text-gold" : "text-muted md:text-white/60 md:hover:text-white/90"
         }`}
       >
         {route.icon}
@@ -42,7 +42,7 @@ export function AppNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-around border-t border-border bg-card py-2 md:inset-x-auto md:bottom-0 md:left-0 md:top-16 md:w-24 md:flex-col md:justify-start md:gap-6 md:border-t-0 md:border-r md:pt-8"
+      className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-around border-t border-border bg-card py-2 md:inset-x-auto md:bottom-0 md:left-0 md:top-16 md:w-24 md:flex-col md:justify-start md:gap-6 md:border-t-0 md:border-r md:border-navy-light md:bg-navy md:pt-8"
       style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
     >
       {navLink(home)}
@@ -50,7 +50,7 @@ export function AppNav() {
       <button
         onClick={open}
         aria-label="Add transaction"
-        className="-mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white shadow-lg transition active:scale-95 md:mt-0"
+        className="-mt-6 flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white shadow-lg transition active:scale-95 md:mt-0 md:border-2 md:border-white/20"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
