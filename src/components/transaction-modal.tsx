@@ -38,12 +38,12 @@ export function TransactionModalProvider({ children }: { children: ReactNode }) 
       {children}
       {isOpen && (
         <div
-          className="fixed inset-0 z-20 flex items-end justify-center bg-navy/40 md:items-center"
+          className="fixed inset-0 z-30 flex items-end justify-center bg-navy/40 md:items-center"
           onClick={() => setIsOpen(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-2xl bg-card px-5 py-5 md:rounded-2xl"
+            className="max-h-[85vh] w-full max-w-sm overflow-y-auto rounded-t-2xl bg-card px-5 py-5 md:max-w-md md:rounded-2xl lg:max-w-lg"
             style={{ paddingBottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
           >
             <div className="mb-3 flex items-center justify-between">
