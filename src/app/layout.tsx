@@ -35,7 +35,7 @@ export default function RootLayout({
     >
       <html lang="en">
         <body className="font-sans">
-          <header className="flex items-center justify-between bg-navy px-6 py-3 text-white">
+          <header className="flex h-16 items-center justify-between bg-navy px-6 text-white">
             <Link href="/" className="flex items-center gap-2">
               <Logo size={32} />
               <span className="font-display text-lg font-bold tracking-tight">Sanchay</span>

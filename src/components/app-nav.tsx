@@ -42,7 +42,7 @@ export function AppNav() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-around border-t border-border bg-card py-2 md:inset-y-0 md:left-0 md:right-auto md:bottom-auto md:w-24 md:flex-col md:justify-start md:gap-6 md:border-t-0 md:border-r md:pt-8"
+      className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-around border-t border-border bg-card py-2 md:inset-x-auto md:bottom-0 md:left-0 md:top-16 md:w-24 md:flex-col md:justify-start md:gap-6 md:border-t-0 md:border-r md:pt-8"
       style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
     >
       {navLink(first)}
