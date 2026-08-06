@@ -1,8 +1,10 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+// Shared route/icon definitions for AppNav (see app-nav.tsx) -- one
+// nav component for every breakpoint, so this is the single source
+// both the mobile bottom bar and the desktop sidebar read from.
+// Exactly 3 tabs + a center FAB (see AppNav), matching the requested
+// nav shape directly -- Recurring isn't a primary tab; it's linked
+// from the Activity page instead, where it naturally belongs (it's
+// the thing that produces transactions).
 export const ROUTES = [
   {
     href: "/accounts",
@@ -16,7 +18,7 @@ export const ROUTES = [
   },
   {
     href: "/transactions",
-    label: "Transactions",
+    label: "Activity",
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
         <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -33,49 +35,4 @@ export const ROUTES = [
       </svg>
     ),
   },
-  {
-    href: "/recurring",
-    label: "Recurring",
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path
-          d="M17 2l4 4-4 4M3 12v-2a4 4 0 014-4h14M7 22l-4-4 4-4M21 12v2a4 4 0 01-4 4H3"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    ),
-  },
 ] as const;
-
-/**
- * Top nav links -- desktop only (hidden below md). Below md, BottomNav
- * (see bottom-nav.tsx) takes over as a fixed bottom tab bar, matching
- * ledger-app's own responsive pattern: bottom nav on mobile, a
- * different presentation once there's room for it. Icons shared
- * between the two (ROUTES above) so the same visual vocabulary reads
- * consistently across breakpoints, not two unrelated nav designs.
- */
-export function NavLinks() {
-  const pathname = usePathname();
-  return (
-    <nav className="hidden gap-6 md:flex">
-      {ROUTES.map((route) => {
-        const active = pathname.startsWith(route.href);
-        return (
-          <Link
-            key={route.href}
-            href={route.href}
-            className={`text-sm font-medium transition ${
-              active ? "text-gold" : "text-white/70 hover:text-white"
-            }`}
-          >
-            {route.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
-}

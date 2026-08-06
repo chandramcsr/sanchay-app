@@ -5,8 +5,7 @@ import Link from "next/link";
 import { type Metadata } from "next";
 
 import { QueryProvider } from "~/components/query-provider";
-import { NavLinks } from "~/components/nav-links";
-import { BottomNav } from "~/components/bottom-nav";
+import { AppNav } from "~/components/app-nav";
 import { Logo } from "~/components/logo";
 
 export const metadata: Metadata = {
@@ -36,24 +35,19 @@ export default function RootLayout({
       <html lang="en">
         <body className="font-sans">
           <header className="flex items-center justify-between bg-navy px-6 py-3 text-white">
-            <div className="flex items-center gap-8">
-              <Link href="/" className="flex items-center gap-2">
-                <Logo size={32} />
-                <span className="font-display text-lg font-bold tracking-tight">Sanchay</span>
-              </Link>
-              <Show when="signed-in">
-                <NavLinks />
-              </Show>
-            </div>
+            <Link href="/" className="flex items-center gap-2">
+              <Logo size={32} />
+              <span className="font-display text-lg font-bold tracking-tight">Sanchay</span>
+            </Link>
             <Show when="signed-in">
               <UserButton />
             </Show>
           </header>
           <QueryProvider>
-            <main className="mx-auto max-w-3xl px-6 py-8 pb-24 md:pb-8">{children}</main>
+            <main className="mx-auto max-w-3xl px-6 py-8 pb-24 md:pb-8 md:pl-24">{children}</main>
           </QueryProvider>
           <Show when="signed-in">
-            <BottomNav />
+            <AppNav />
           </Show>
         </body>
       </html>
