@@ -159,3 +159,46 @@ export interface AskResponse {
   abstained: boolean;
   grounded: boolean;
 }
+
+export interface DiscussionActionItem {
+  owner: string; // "—" when no speaker could be attributed
+  task: string;
+}
+
+export interface DiscussionAnalysis {
+  summary: string[];
+  decisions: string[];
+  actions: DiscussionActionItem[];
+  risks: string[];
+  suggestions: string[];
+  questions: string[];
+  sentiment: { pos: number; neu: number; neg: number };
+}
+
+export interface DiscussionListItem {
+  id: string;
+  title: string;
+  duration_seconds: number;
+  created_at: string;
+}
+
+export interface Discussion extends DiscussionListItem {
+  transcript: string;
+  analysis: DiscussionAnalysis | null;
+  updated_at: string | null;
+}
+
+export interface DiscussionCreateInput {
+  title: string;
+  transcript: string;
+  analysis: DiscussionAnalysis | null;
+  duration_seconds: number;
+}
+
+// Mirrors app/schemas/discussions.py's DiscussionUpdateRequest --
+// rename only, matching ledger-app's DiscussionHistoryModal (title is
+// the only thing ever edited after a discussion is saved; transcript
+// and analysis are fixed at save time).
+export interface DiscussionUpdateInput {
+  title: string;
+}

@@ -11,6 +11,10 @@ import type {
   AskResponse,
   Budget,
   BudgetUpsertInput,
+  Discussion,
+  DiscussionCreateInput,
+  DiscussionListItem,
+  DiscussionUpdateInput,
   RecurringRule,
   RecurringRuleCreateInput,
   RecurringRuleUpdateInput,
@@ -256,5 +260,51 @@ export function useAskSanchay() {
   return useMutation({
     mutationFn: (question: string) =>
       apiRequest<AskResponse>("/ai/ask", getToken, { method: "POST", body: JSON.stringify({ question }) }),
+  });
+}
+
+export function useDiscussions() {
+  const { getToken } = useAuth();
+  return useQuery({
+    queryKey: ["discussions"],
+    queryFn: () => apiRequest<DiscussionListItem[]>("/discussions", getToken),
+  });
+}
+
+export function useDiscussion(id: string | null) {
+  const { getToken } = useAuth();
+  return useQuery({
+    queryKey: ["discussions", id],
+    queryFn: () => apiRequest<Discussion>(`/discussions/${id}`, getToken),
+    enabled: id !== null,
+  });
+}
+
+export function useCreateDiscussion() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: DiscussionCreateInput) =>
+      apiRequest<Discussion>("/discussions", getToken, { method: "POST", body: JSON.stringify(input) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["discussions"] }),
+  });
+}
+
+export function useRenameDiscussion() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: DiscussionUpdateInput & { id: string }) =>
+      apiRequest<Discussion>(`/discussions/${id}`, getToken, { method: "PUT", body: JSON.stringify(input) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["discussions"] }),
+  });
+}
+
+export function useDeleteDiscussion() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiRequest<void>(`/discussions/${id}`, getToken, { method: "DELETE" }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["discussions"] }),
   });
 }

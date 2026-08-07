@@ -3,11 +3,13 @@
 import { useState } from "react";
 
 import { AskSanchayChat } from "~/components/ask-sanchay-chat";
+import { DiscussionHistorySection } from "~/components/discussion-history-section";
 
-type Section = "ask-sanchay";
+type Section = "ask-sanchay" | "discussion-recorder";
 
 const SECTIONS: { id: Section; label: string; description: string }[] = [
   { id: "ask-sanchay", label: "Ask Sanchay", description: "Ask about your own spending, in plain language" },
+  { id: "discussion-recorder", label: "Discussion Recorder", description: "Record and analyze a conversation" },
 ];
 
 export default function SettingsPage() {
@@ -31,6 +33,7 @@ export default function SettingsPage() {
 
       <div className="flex-1 bg-card p-5">
         {selected === "ask-sanchay" && <AskSanchayChat />}
+        {selected === "discussion-recorder" && <DiscussionHistorySection />}
       </div>
     </div>
   );
