@@ -42,7 +42,7 @@ export function AskSanchayChat() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <p className="text-sm text-muted">
         Ask about your own transactions — answers are grounded in what&apos;s actually in your Activity, with
         the transactions it used shown below each answer.
@@ -55,7 +55,7 @@ export function AskSanchayChat() {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
+      <div className="flex flex-col gap-4">
         {exchanges.map((ex, i) => (
           <div key={i} className="flex flex-col gap-2">
             <div className="self-end rounded-2xl rounded-br-sm bg-navy px-4 py-2.5 text-sm text-white">
