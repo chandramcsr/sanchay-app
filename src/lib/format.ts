@@ -108,7 +108,7 @@ export function accountLabels<T extends { id: string; name: string; type: string
  */
 export function groupAccountsByType<T extends { id: string; name: string; type: string }>(
   accounts: T[],
-): { type: string; label: string; entries: { account: T; label: string }[] }[] {
+): { type: string; label: string; typeLabel: string; entries: { account: T; label: string }[] }[] {
   const byType = new Map<string, T[]>();
   for (const a of accounts) {
     const list = byType.get(a.type) ?? [];
@@ -125,6 +125,12 @@ export function groupAccountsByType<T extends { id: string; name: string; type: 
       seen[account.name] = (seen[account.name] ?? 0) + 1;
       return { account, label: `${account.name} #${seen[account.name]}` };
     });
-    return { type, label: `${ACCOUNT_TYPE_ICONS[type] ?? "🏦"} ${ACCOUNT_TYPE_LABELS[type] ?? type}`, entries };
+    const typeLabel = ACCOUNT_TYPE_LABELS[type] ?? type;
+    // label keeps the emoji prefix for native <optgroup> text content
+    // (still used nowhere now that both selects are custom pickers,
+    // kept in case a future native-select context needs it again);
+    // typeLabel is the plain text for anywhere rendering a real
+    // AccountTypeIcon SVG alongside it instead.
+    return { type, label: `${ACCOUNT_TYPE_ICONS[type] ?? "🏦"} ${typeLabel}`, typeLabel, entries };
   });
 }

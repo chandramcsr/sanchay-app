@@ -9,7 +9,8 @@ import {
   useSavingsGoals,
   useUpdateSavingsGoal,
 } from "~/lib/queries";
-import { formatMoney, formatDate, accountLabels, groupAccountsByType } from "~/lib/format";
+import { formatMoney, formatDate, accountLabels } from "~/lib/format";
+import { AccountPicker } from "~/components/account-picker";
 import type { SavingsGoal } from "~/lib/types";
 
 export function SavingsGoalsSection() {
@@ -210,21 +211,7 @@ function GoalModal({
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted">Track using account</span>
-            <select
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
-              className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
-            >
-              {groupAccountsByType(accounts).map((group) => (
-                <optgroup key={group.type} label={group.label}>
-                  {group.entries.map(({ account, label }) => (
-                    <option key={account.id} value={account.id}>
-                      {label}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+            <AccountPicker accounts={accounts} value={accountId} onChange={setAccountId} />
           </label>
 
           {error && <p className="text-sm text-negative">{error}</p>}

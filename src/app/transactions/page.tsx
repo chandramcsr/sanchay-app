@@ -3,9 +3,10 @@
 import { useState } from "react";
 
 import { useAccounts, useDeleteTransaction, useRecurringRules, useTransactions, useUpdateTransaction } from "~/lib/queries";
-import { formatMoney, formatDate, accountLabels, groupAccountsByType } from "~/lib/format";
+import { formatMoney, formatDate, accountLabels } from "~/lib/format";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, categoryIcon, type TransactionType } from "~/lib/categories";
 import { RecurringList } from "~/components/recurring-list";
+import { AccountPicker } from "~/components/account-picker";
 import type { Transaction } from "~/lib/types";
 
 export default function TransactionsPage() {
@@ -43,22 +44,13 @@ export default function TransactionsPage() {
       <h1 className="font-display text-2xl font-bold text-navy">Activity</h1>
 
       {accounts && accounts.length > 0 && (
-        <select
+        <AccountPicker
+          accounts={accounts}
           value={accountFilter}
-          onChange={(e) => setAccountFilter(e.target.value)}
-          className="self-start rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-gold"
-        >
-          <option value="all">All accounts</option>
-          {groupAccountsByType(accounts).map((group) => (
-            <optgroup key={group.type} label={group.label}>
-              {group.entries.map(({ account, label }) => (
-                <option key={account.id} value={account.id}>
-                  {label}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </select>
+          onChange={setAccountFilter}
+          allOption={{ value: "all", label: "All accounts" }}
+          className="max-w-xs self-start"
+        />
       )}
 
       {!accounts || accounts.length === 0 ? (
