@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS, type TransactionType } from "~/lib/categories";
-import { ACCOUNT_TYPE_ICONS, accountLabels } from "~/lib/format";
+import { ACCOUNT_TYPE_ICONS, groupAccountsByType } from "~/lib/format";
 import type { AccountType, RecurringFrequency } from "~/lib/types";
 
 const REPEATS_OPTIONS: { value: "never" | RecurringFrequency; label: string }[] = [
@@ -48,7 +48,7 @@ export function AddTransactionForm({
   error: string | null;
 }) {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
-  const accountLabelMap = accountLabels(accounts);
+  const accountGroups = groupAccountsByType(accounts);
   const [type, setType] = useState<TransactionType>("expense");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -150,25 +150,30 @@ export function AddTransactionForm({
         </label>
       </div>
 
-      <div className="flex flex-col gap-1 text-sm">
+      <div className="flex flex-col gap-2 text-sm">
         <span className="text-muted">Account</span>
-        <div className="flex flex-wrap gap-2">
-          {accounts.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => setAccountId(a.id)}
-              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-                accountId === a.id
-                  ? "border-navy bg-navy text-white"
-                  : "border-border text-navy hover:border-gold"
-              }`}
-            >
-              <span aria-hidden="true">{ACCOUNT_TYPE_ICONS[a.type] ?? "🏦"}</span>
-              {accountLabelMap.get(a.id) ?? a.name}
-            </button>
-          ))}
-        </div>
+        {accountGroups.map((group) => (
+          <div key={group.type} className="flex flex-col gap-1.5">
+            <span className="text-xs text-muted">{group.label}</span>
+            <div className="flex flex-wrap gap-2">
+              {group.entries.map(({ account, label }) => (
+                <button
+                  key={account.id}
+                  type="button"
+                  onClick={() => setAccountId(account.id)}
+                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
+                    accountId === account.id
+                      ? "border-navy bg-navy text-white"
+                      : "border-border text-navy hover:border-gold"
+                  }`}
+                >
+                  <span aria-hidden="true">{ACCOUNT_TYPE_ICONS[account.type] ?? "🏦"}</span>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       <label className="flex flex-col gap-1 text-sm">

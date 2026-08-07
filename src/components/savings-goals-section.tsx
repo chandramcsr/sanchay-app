@@ -9,7 +9,7 @@ import {
   useSavingsGoals,
   useUpdateSavingsGoal,
 } from "~/lib/queries";
-import { formatMoney, formatDate, accountLabels } from "~/lib/format";
+import { formatMoney, formatDate, accountLabels, groupAccountsByType } from "~/lib/format";
 import type { SavingsGoal } from "~/lib/types";
 
 export function SavingsGoalsSection() {
@@ -149,7 +149,6 @@ function GoalModal({
   const [targetAmount, setTargetAmount] = useState(goal ? String(goal.target_amount) : "");
   const [targetDate, setTargetDate] = useState(goal?.target_date ?? "");
   const [accountId, setAccountId] = useState(goal?.account_id ?? accounts[0]!.id);
-  const accountLabelMap = accountLabels(accounts);
 
   return (
     <div className="fixed inset-0 z-30 flex items-end justify-center bg-navy/40 sm:items-center" onClick={onClose}>
@@ -216,10 +215,14 @@ function GoalModal({
               onChange={(e) => setAccountId(e.target.value)}
               className="rounded-lg border border-border px-3 py-2 outline-none focus:border-gold"
             >
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {accountLabelMap.get(a.id) ?? a.name}
-                </option>
+              {groupAccountsByType(accounts).map((group) => (
+                <optgroup key={group.type} label={group.label}>
+                  {group.entries.map(({ account, label }) => (
+                    <option key={account.id} value={account.id}>
+                      {label}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </label>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { useAccounts, useDeleteTransaction, useRecurringRules, useTransactions, useUpdateTransaction } from "~/lib/queries";
-import { formatMoney, formatDate, accountLabels } from "~/lib/format";
+import { formatMoney, formatDate, accountLabels, groupAccountsByType } from "~/lib/format";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, categoryIcon, type TransactionType } from "~/lib/categories";
 import { RecurringList } from "~/components/recurring-list";
 import type { Transaction } from "~/lib/types";
@@ -49,10 +49,14 @@ export default function TransactionsPage() {
           className="self-start rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-gold"
         >
           <option value="all">All accounts</option>
-          {accounts.map((a) => (
-            <option key={a.id} value={a.id}>
-              {accountLabelMap.get(a.id) ?? a.name}
-            </option>
+          {groupAccountsByType(accounts).map((group) => (
+            <optgroup key={group.type} label={group.label}>
+              {group.entries.map(({ account, label }) => (
+                <option key={account.id} value={account.id}>
+                  {label}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       )}

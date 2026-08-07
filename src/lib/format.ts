@@ -93,3 +93,38 @@ export function accountLabels<T extends { id: string; name: string; type: string
   }
   return result;
 }
+
+/**
+ * Matches ledger-app's own accountsByType + <optgroup> pattern exactly
+ * (HomeTab.tsx/TransactionsTab.tsx) -- native <select> can't render an
+ * actual logo image inside an option, only plain text, so the real
+ * disambiguation there is grouping by type under a labeled section
+ * (the type shows once, as the group header, not repeated per option)
+ * rather than appending "(Checking)" to every single name. Within a
+ * group, ledger-app's own version doesn't handle two same-named
+ * same-type accounts (e.g. two Chase checking accounts) -- this adds
+ * that on top, same numbered-tiebreaker approach as accountLabels,
+ * scoped per group instead of globally.
+ */
+export function groupAccountsByType<T extends { id: string; name: string; type: string }>(
+  accounts: T[],
+): { type: string; label: string; entries: { account: T; label: string }[] }[] {
+  const byType = new Map<string, T[]>();
+  for (const a of accounts) {
+    const list = byType.get(a.type) ?? [];
+    list.push(a);
+    byType.set(a.type, list);
+  }
+
+  return Array.from(byType.entries()).map(([type, list]) => {
+    const counts: Record<string, number> = {};
+    for (const a of list) counts[a.name] = (counts[a.name] ?? 0) + 1;
+    const seen: Record<string, number> = {};
+    const entries = list.map((account) => {
+      if ((counts[account.name] ?? 0) <= 1) return { account, label: account.name };
+      seen[account.name] = (seen[account.name] ?? 0) + 1;
+      return { account, label: `${account.name} #${seen[account.name]}` };
+    });
+    return { type, label: `${ACCOUNT_TYPE_ICONS[type] ?? "🏦"} ${ACCOUNT_TYPE_LABELS[type] ?? type}`, entries };
+  });
+}
