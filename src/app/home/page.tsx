@@ -63,19 +63,6 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Link
-        href="/ask"
-        className="flex items-center justify-between rounded-2xl border border-gold bg-gold/10 px-5 py-4 transition hover:bg-gold/20"
-      >
-        <div>
-          <div className="font-display font-bold text-navy">Ask Sanchay</div>
-          <div className="text-xs text-muted">Ask about your own spending, in plain language</div>
-        </div>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-navy">
-          <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </Link>
-
       <div className="rounded-2xl bg-navy px-6 py-8 text-white">
         <div className="text-sm text-white/60">Net Cash Flow · This Month</div>
         <div className="font-mono text-4xl font-medium tabular-nums">

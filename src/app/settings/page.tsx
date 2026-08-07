@@ -1,32 +1,40 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+
+import { AskSanchayChat } from "~/components/ask-sanchay-chat";
+
+type Section = "ask-sanchay";
+
+const SECTIONS: { id: Section; label: string; description: string }[] = [
+  { id: "ask-sanchay", label: "Ask Sanchay", description: "Ask about your own spending, in plain language" },
+];
 
 export default function SettingsPage() {
+  const [selected, setSelected] = useState<Section>("ask-sanchay");
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-2xl font-bold text-navy">Settings</h1>
 
-      <div>
-        <h2 className="mb-3 font-display text-lg font-bold text-navy">Tools</h2>
-        <Link
-          href="/ask"
-          className="flex items-center justify-between rounded-xl border border-border bg-card px-5 py-4 transition hover:border-gold"
-        >
-          <div>
-            <div className="font-medium text-navy">Ask Sanchay</div>
-            <div className="text-xs text-muted">Ask about your own spending, in plain language</div>
-          </div>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0 text-muted">
-            <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </Link>
-      </div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
+        <div className="flex gap-2 overflow-x-auto md:w-64 md:shrink-0 md:flex-col md:gap-1 md:overflow-visible">
+          {SECTIONS.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSelected(s.id)}
+              className={`shrink-0 rounded-xl px-4 py-3 text-left text-sm font-medium transition md:shrink ${
+                selected === s.id ? "bg-card text-navy" : "text-muted hover:bg-card/60"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
 
-      <div className="rounded-2xl border border-dashed border-border px-6 py-10 text-center">
-        <p className="text-navy">Nothing else here yet.</p>
-        <p className="mt-1 text-sm text-muted">
-          More app-level preferences land here as they&apos;re built. For email, password, or sign-in
-          methods, use the profile menu (top right).
-        </p>
+        <div className="min-h-[420px] flex-1 rounded-2xl border border-border bg-card px-5 py-5">
+          {selected === "ask-sanchay" && <AskSanchayChat />}
+        </div>
       </div>
     </div>
   );

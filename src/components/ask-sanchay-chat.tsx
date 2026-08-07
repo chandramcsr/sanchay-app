@@ -11,7 +11,13 @@ interface Exchange {
   error?: string;
 }
 
-export default function AskPage() {
+/**
+ * The chat UI itself, extracted so it can render inside a panel (the
+ * Settings two-pane layout) rather than only as a standalone page --
+ * same component, two different places to embed it, no duplicated
+ * chat logic between them.
+ */
+export function AskSanchayChat() {
   const [question, setQuestion] = useState("");
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
   const ask = useAskSanchay();
@@ -36,14 +42,11 @@ export default function AskPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold text-navy">Ask Sanchay</h1>
-        <p className="mt-1 text-sm text-muted">
-          Ask about your own transactions — answers are grounded in what&apos;s actually in your Activity,
-          with the transactions it used shown below each answer.
-        </p>
-      </div>
+    <div className="flex h-full flex-col gap-4">
+      <p className="text-sm text-muted">
+        Ask about your own transactions — answers are grounded in what&apos;s actually in your Activity, with
+        the transactions it used shown below each answer.
+      </p>
 
       {exchanges.length === 0 && (
         <div className="rounded-2xl border border-dashed border-border px-6 py-10 text-center">
@@ -52,7 +55,7 @@ export default function AskPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
         {exchanges.map((ex, i) => (
           <div key={i} className="flex flex-col gap-2">
             <div className="self-end rounded-2xl rounded-br-sm bg-navy px-4 py-2.5 text-sm text-white">
@@ -106,7 +109,7 @@ export default function AskPage() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="sticky bottom-20 flex gap-2 md:bottom-4">
+      <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
