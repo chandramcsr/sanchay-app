@@ -3,8 +3,7 @@
 import { useState } from "react";
 
 import { EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS, type TransactionType } from "~/lib/categories";
-import { groupAccountsByType } from "~/lib/format";
-import { AccountTypeIcon } from "~/components/account-type-icon";
+import { AccountPicker } from "~/components/account-picker";
 import type { AccountType, RecurringFrequency } from "~/lib/types";
 
 const REPEATS_OPTIONS: { value: "never" | RecurringFrequency; label: string }[] = [
@@ -49,7 +48,6 @@ export function AddTransactionForm({
   error: string | null;
 }) {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
-  const accountGroups = groupAccountsByType(accounts);
   const [type, setType] = useState<TransactionType>("expense");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -151,31 +149,10 @@ export function AddTransactionForm({
         </label>
       </div>
 
-      <div className="flex flex-col gap-2 text-sm">
+      <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Account</span>
-        {accountGroups.map((group) => (
-          <div key={group.type} className="flex flex-col gap-1.5">
-            <span className="text-xs text-muted">{group.label}</span>
-            <div className="flex flex-wrap gap-2">
-              {group.entries.map(({ account, label }) => (
-                <button
-                  key={account.id}
-                  type="button"
-                  onClick={() => setAccountId(account.id)}
-                  className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition ${
-                    accountId === account.id
-                      ? "border-navy bg-navy text-white"
-                      : "border-border text-navy hover:border-gold"
-                  }`}
-                >
-                  <AccountTypeIcon type={account.type} size={16} />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+        <AccountPicker accounts={accounts} value={accountId} onChange={setAccountId} />
+      </label>
 
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">Note (optional)</span>
