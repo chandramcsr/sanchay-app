@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { useAccounts, useDeleteTransaction, useRecurringRules, useTransactions, useUpdateTransaction } from "~/lib/queries";
-import { formatMoney, formatDate } from "~/lib/format";
+import { formatMoney, formatDate, accountLabels } from "~/lib/format";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, categoryIcon, type TransactionType } from "~/lib/categories";
 import { RecurringList } from "~/components/recurring-list";
 import type { Transaction } from "~/lib/types";
@@ -19,7 +19,8 @@ export default function TransactionsPage() {
   const deleteTransaction = useDeleteTransaction();
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const accountName = (id: string) => accounts?.find((a) => a.id === id)?.name ?? "—";
+  const accountLabelMap = accounts ? accountLabels(accounts) : new Map<string, string>();
+  const accountName = (id: string) => accountLabelMap.get(id) ?? accounts?.find((a) => a.id === id)?.name ?? "—";
 
   const hasTransactions = !!transactions && transactions.length > 0;
   const hasRecurring = !!recurringRules && recurringRules.length > 0;
@@ -50,7 +51,7 @@ export default function TransactionsPage() {
           <option value="all">All accounts</option>
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>
-              {a.name}
+              {accountLabelMap.get(a.id) ?? a.name}
             </option>
           ))}
         </select>

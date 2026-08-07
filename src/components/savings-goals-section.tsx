@@ -9,7 +9,7 @@ import {
   useSavingsGoals,
   useUpdateSavingsGoal,
 } from "~/lib/queries";
-import { formatMoney, formatDate } from "~/lib/format";
+import { formatMoney, formatDate, accountLabels } from "~/lib/format";
 import type { SavingsGoal } from "~/lib/types";
 
 export function SavingsGoalsSection() {
@@ -20,7 +20,8 @@ export function SavingsGoalsSection() {
   const deleteGoal = useDeleteSavingsGoal();
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | "new" | null>(null);
 
-  const accountName = (id: string) => accounts?.find((a) => a.id === id)?.name ?? "—";
+  const accountLabelMap = accounts ? accountLabels(accounts) : new Map<string, string>();
+  const accountName = (id: string) => accountLabelMap.get(id) ?? accounts?.find((a) => a.id === id)?.name ?? "—";
 
   return (
     <div>
@@ -138,7 +139,7 @@ function GoalModal({
   error,
 }: {
   goal: SavingsGoal | null;
-  accounts: { id: string; name: string }[];
+  accounts: { id: string; name: string; type: string }[];
   onClose: () => void;
   onSubmit: (input: { name: string; target_amount: number; target_date?: string; account_id: string }) => void;
   submitting: boolean;
@@ -148,6 +149,7 @@ function GoalModal({
   const [targetAmount, setTargetAmount] = useState(goal ? String(goal.target_amount) : "");
   const [targetDate, setTargetDate] = useState(goal?.target_date ?? "");
   const [accountId, setAccountId] = useState(goal?.account_id ?? accounts[0]!.id);
+  const accountLabelMap = accountLabels(accounts);
 
   return (
     <div className="fixed inset-0 z-30 flex items-end justify-center bg-navy/40 sm:items-center" onClick={onClose}>
@@ -216,7 +218,7 @@ function GoalModal({
             >
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.name}
+                  {accountLabelMap.get(a.id) ?? a.name}
                 </option>
               ))}
             </select>

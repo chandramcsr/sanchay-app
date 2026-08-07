@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS, type TransactionType } from "~/lib/categories";
-import { ACCOUNT_TYPE_ICONS } from "~/lib/format";
+import { ACCOUNT_TYPE_ICONS, accountLabels } from "~/lib/format";
 import type { AccountType, RecurringFrequency } from "~/lib/types";
 
 const REPEATS_OPTIONS: { value: "never" | RecurringFrequency; label: string }[] = [
@@ -48,6 +48,7 @@ export function AddTransactionForm({
   error: string | null;
 }) {
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
+  const accountLabelMap = accountLabels(accounts);
   const [type, setType] = useState<TransactionType>("expense");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -164,7 +165,7 @@ export function AddTransactionForm({
               }`}
             >
               <span aria-hidden="true">{ACCOUNT_TYPE_ICONS[a.type] ?? "🏦"}</span>
-              {a.name}
+              {accountLabelMap.get(a.id) ?? a.name}
             </button>
           ))}
         </div>

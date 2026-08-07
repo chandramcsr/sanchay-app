@@ -57,3 +57,39 @@ export function resolveStartingBalance(type: string, enteredAmount: number): num
   if (isDebtAccountType(type)) return enteredAmount === 0 ? 0 : -Math.abs(enteredAmount);
   return enteredAmount;
 }
+
+/**
+ * Nothing stops two accounts from sharing a name (a checking and a
+ * credit card both reasonably called "Chase") -- anywhere accounts
+ * appear in a selection list (a filter dropdown, an account picker),
+ * showing the type alongside the name is what actually lets someone
+ * tell them apart. But name+type together can still collide (two
+ * Chase checking accounts) -- for that case, accountLabels() (plural,
+ * takes the whole list) appends a numbered tiebreaker only to the
+ * entries that still need one, in creation order, so labels stay
+ * unique without getting verbose for the common case where a single
+ * type suffix is already enough.
+ */
+export function accountLabels<T extends { id: string; name: string; type: string; created_at?: string }>(
+  accounts: T[],
+): Map<string, string> {
+  const withTypeLabel = accounts.map((a) => ({
+    id: a.id,
+    base: `${a.name} (${ACCOUNT_TYPE_LABELS[a.type] ?? a.type})`,
+  }));
+
+  const counts: Record<string, number> = {};
+  for (const a of withTypeLabel) counts[a.base] = (counts[a.base] ?? 0) + 1;
+
+  const seen: Record<string, number> = {};
+  const result = new Map<string, string>();
+  for (const a of withTypeLabel) {
+    if ((counts[a.base] ?? 0) <= 1) {
+      result.set(a.id, a.base);
+    } else {
+      seen[a.base] = (seen[a.base] ?? 0) + 1;
+      result.set(a.id, `${a.base} #${seen[a.base]}`);
+    }
+  }
+  return result;
+}
