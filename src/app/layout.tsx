@@ -46,7 +46,7 @@ export default function RootLayout({
           </header>
           <QueryProvider>
             <TransactionModalProvider>
-              <main className="px-6 pb-24 pt-24 md:pb-8 md:pl-24 md:pt-24">{children}</main>
+              <main className="px-6 pb-24 pt-24 md:pb-8 md:pl-28 md:pt-24">{children}</main>
               <Show when="signed-in">
                 <AppNav />
               </Show>
