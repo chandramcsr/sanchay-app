@@ -57,7 +57,7 @@ export default function BudgetsPage() {
   const allocation = computeBudgetAllocation(EXPENSE_CATEGORY_DEFS, budgetLimitsByCategory, monthIncome);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <h1 className="font-display text-2xl font-bold text-navy">Budgets</h1>
 
       {isError && (

@@ -20,7 +20,7 @@ export default function AccountsPage() {
   const netWorth = accounts?.reduce((sum, a) => sum + a.current_balance, 0) ?? 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div className="rounded-2xl bg-navy px-6 py-8 text-white">
         <div className="text-sm text-white/60">Net Worth · All Accounts</div>
         <div className="font-mono text-4xl font-medium tabular-nums">

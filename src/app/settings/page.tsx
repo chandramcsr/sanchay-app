@@ -16,7 +16,7 @@ export default function SettingsPage() {
   const [selected, setSelected] = useState<Section>("ask-sanchay");
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-border md:min-h-[70vh] md:flex-row">
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-border md:min-h-[calc(100vh-9rem)] md:flex-row">
       <div className="flex gap-1 overflow-x-auto bg-cream p-3 md:w-64 md:shrink-0 md:flex-col md:overflow-visible md:border-r md:border-border">
         {SECTIONS.map((s) => (
           <button

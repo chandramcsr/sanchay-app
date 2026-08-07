@@ -62,7 +62,7 @@ export default function HomePage() {
   const recent = (monthTransactions ?? []).slice(0, 5);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div className="rounded-2xl bg-navy px-6 py-8 text-white">
         <div className="text-sm text-white/60">Net Cash Flow · This Month</div>
         <div className="font-mono text-4xl font-medium tabular-nums">
