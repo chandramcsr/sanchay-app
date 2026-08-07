@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 import { EXPENSE_CATEGORY_DEFS, INCOME_CATEGORY_DEFS, type TransactionType } from "~/lib/categories";
-import { ACCOUNT_TYPE_ICONS, groupAccountsByType } from "~/lib/format";
+import { groupAccountsByType } from "~/lib/format";
+import { AccountTypeIcon } from "~/components/account-type-icon";
 import type { AccountType, RecurringFrequency } from "~/lib/types";
 
 const REPEATS_OPTIONS: { value: "never" | RecurringFrequency; label: string }[] = [
@@ -167,7 +168,7 @@ export function AddTransactionForm({
                       : "border-border text-navy hover:border-gold"
                   }`}
                 >
-                  <span aria-hidden="true">{ACCOUNT_TYPE_ICONS[account.type] ?? "🏦"}</span>
+                  <AccountTypeIcon type={account.type} size={16} />
                   {label}
                 </button>
               ))}

@@ -3,8 +3,9 @@
 import Link from "next/link";
 
 import { useAccounts, useTransactions } from "~/lib/queries";
-import { formatMoney, formatDate, ACCOUNT_TYPE_LABELS, ACCOUNT_TYPE_ICONS, isDebtAccountType } from "~/lib/format";
+import { formatMoney, formatDate, ACCOUNT_TYPE_LABELS, isDebtAccountType } from "~/lib/format";
 import { categoryIcon } from "~/lib/categories";
+import { AccountTypeIcon } from "~/components/account-type-icon";
 
 function monthStartIso(): string {
   const d = new Date();
@@ -86,7 +87,7 @@ export default function HomePage() {
             {debtEntries.map(([type, total]) => (
               <div key={type} className="flex items-center justify-between py-2">
                 <span className="flex items-center gap-2 text-navy">
-                  <span aria-hidden="true">{ACCOUNT_TYPE_ICONS[type]}</span>
+                  <AccountTypeIcon type={type} size={18} />
                   {ACCOUNT_TYPE_LABELS[type]}s
                 </span>
                 <span className="font-mono tabular-nums text-navy">{formatMoney(total)}</span>

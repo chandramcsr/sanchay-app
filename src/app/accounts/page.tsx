@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { useAccounts, useBudgets, useCreateAccount, useDeleteAccount } from "~/lib/queries";
 import { formatMoney, ACCOUNT_TYPE_LABELS, isDebtAccountType, resolveStartingBalance } from "~/lib/format";
+import { AccountTypeIcon } from "~/components/account-type-icon";
 import type { AccountType } from "~/lib/types";
 
 const ACCOUNT_TYPES: AccountType[] = ["checking", "savings", "credit_card", "loan", "investment"];
@@ -91,9 +92,12 @@ export default function AccountsPage() {
               key={account.id}
               className="flex items-center justify-between rounded-xl bg-card border border-border px-5 py-4"
             >
-              <div>
-                <div className="font-medium text-navy">{account.name}</div>
-                <div className="text-xs text-muted">{ACCOUNT_TYPE_LABELS[account.type]}</div>
+              <div className="flex items-center gap-3">
+                <AccountTypeIcon type={account.type} size={22} />
+                <div>
+                  <div className="font-medium text-navy">{account.name}</div>
+                  <div className="text-xs text-muted">{ACCOUNT_TYPE_LABELS[account.type]}</div>
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <div
