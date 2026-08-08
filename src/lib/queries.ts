@@ -8,7 +8,6 @@ import type {
   Account,
   AccountCreateInput,
   AccountUpdateInput,
-  AskResponse,
   Budget,
   BudgetUpsertInput,
   Discussion,
@@ -252,14 +251,6 @@ export function useDeleteSavingsGoal() {
   return useMutation({
     mutationFn: (id: string) => apiRequest<void>(`/savings-goals/${id}`, getToken, { method: "DELETE" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savings-goals"] }),
-  });
-}
-
-export function useAskSanchay() {
-  const { getToken } = useAuth();
-  return useMutation({
-    mutationFn: (question: string) =>
-      apiRequest<AskResponse>("/ai/ask", getToken, { method: "POST", body: JSON.stringify({ question }) }),
   });
 }
 

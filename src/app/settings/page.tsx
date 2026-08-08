@@ -2,18 +2,16 @@
 
 import { useState } from "react";
 
-import { AskSanchayChat } from "~/components/ask-sanchay-chat";
 import { DiscussionHistorySection } from "~/components/discussion-history-section";
 
-type Section = "ask-sanchay" | "discussion-recorder";
+type Section = "discussion-recorder";
 
 const SECTIONS: { id: Section; label: string; description: string }[] = [
-  { id: "ask-sanchay", label: "Ask Sanchay", description: "Ask about your own spending, in plain language" },
   { id: "discussion-recorder", label: "Discussion Recorder", description: "Record and analyze a conversation" },
 ];
 
 export default function SettingsPage() {
-  const [selected, setSelected] = useState<Section>("ask-sanchay");
+  const [selected, setSelected] = useState<Section>("discussion-recorder");
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border md:min-h-[calc(100vh-9rem)] md:flex-row">
@@ -32,7 +30,6 @@ export default function SettingsPage() {
       </div>
 
       <div className="flex-1 bg-card p-5">
-        {selected === "ask-sanchay" && <AskSanchayChat />}
         {selected === "discussion-recorder" && <DiscussionHistorySection />}
       </div>
     </div>

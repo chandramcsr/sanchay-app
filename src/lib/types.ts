@@ -147,19 +147,6 @@ export interface SavingsGoalUpdateInput {
   account_id?: string;
 }
 
-export interface AskSource {
-  label: string;
-  text: string;
-  similarity: number;
-}
-
-export interface AskResponse {
-  answer: string;
-  sources: AskSource[];
-  abstained: boolean;
-  grounded: boolean;
-}
-
 export interface DiscussionActionItem {
   owner: string; // "—" when no speaker could be attributed
   task: string;
