@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAccounts, useBudgets, useCreateAccount, useDeleteAccount } from "~/lib/queries";
 import { formatMoney, ACCOUNT_TYPE_LABELS, isDebtAccountType, resolveStartingBalance } from "~/lib/format";
 import { AccountTypeIcon } from "~/components/account-type-icon";
+import { TransferModal } from "~/components/transfer-modal";
 import type { AccountType } from "~/lib/types";
 
 const ACCOUNT_TYPES: AccountType[] = ["checking", "savings", "credit_card", "loan", "investment"];
@@ -16,6 +17,7 @@ export default function AccountsPage() {
   const createAccount = useCreateAccount();
   const deleteAccount = useDeleteAccount();
   const [formOpen, setFormOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
 
   const netWorth = accounts?.reduce((sum, a) => sum + a.current_balance, 0) ?? 0;
 
@@ -137,6 +139,22 @@ export default function AccountsPage() {
         >
           + Add account
         </button>
+      )}
+
+      {accounts && accounts.length > 1 && (
+        <button
+          onClick={() => setTransferOpen(true)}
+          className="rounded-xl bg-navy px-5 py-3 text-sm font-medium text-white transition hover:opacity-90"
+        >
+          Transfer between accounts
+        </button>
+      )}
+      {accounts && accounts.length === 1 && (
+        <p className="text-center text-sm text-muted">Add a second account to transfer money between them.</p>
+      )}
+
+      {transferOpen && accounts && (
+        <TransferModal accounts={accounts} onClose={() => setTransferOpen(false)} />
       )}
     </div>
   );

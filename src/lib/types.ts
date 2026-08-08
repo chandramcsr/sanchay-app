@@ -36,6 +36,9 @@ export interface Transaction {
   description: string | null;
   category: string | null;
   date: string; // YYYY-MM-DD
+  // Links the two legs of a transfer -- null for every ordinary
+  // transaction. See TransferCreateInput/useCreateTransfer.
+  transfer_group_id: string | null;
   created_at: string;
   updated_at: string | null;
 }
@@ -188,4 +191,21 @@ export interface DiscussionCreateInput {
 // and analysis are fixed at save time).
 export interface DiscussionUpdateInput {
   title: string;
+}
+
+// Mirrors app/schemas/transactions.py's TransferCreateRequest --
+// amount is always a positive dollar figure; the sign convention
+// (negative expense leg, positive income leg) is applied server-side
+// when the two transactions actually get built, not decided here.
+export interface TransferCreateInput {
+  from_account_id: string;
+  to_account_id: string;
+  amount: number;
+  date: string;
+  note?: string;
+}
+
+export interface TransferResponse {
+  from_transaction: Transaction;
+  to_transaction: Transaction;
 }

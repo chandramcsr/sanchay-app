@@ -20,6 +20,7 @@ export function AccountPicker<T extends { id: string; name: string; type: string
   value,
   onChange,
   allOption,
+  exclude,
   className,
 }: {
   accounts: T[];
@@ -27,11 +28,14 @@ export function AccountPicker<T extends { id: string; name: string; type: string
   onChange: (id: string) => void;
   /** e.g. { value: "all", label: "All accounts" } for a filter context; omit for a required single-account picker. */
   allOption?: { value: string; label: string };
+  /** Account id to hide from the list — e.g. a Transfer's "To" picker excludes whatever "From" currently has selected, so the two can't match. */
+  exclude?: string;
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const groups = groupAccountsByType(accounts);
+  const visibleAccounts = exclude ? accounts.filter((a) => a.id !== exclude) : accounts;
+  const groups = groupAccountsByType(visibleAccounts);
 
   useEffect(() => {
     if (!open) return;

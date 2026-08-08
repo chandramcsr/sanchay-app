@@ -134,7 +134,7 @@ export default function HomePage() {
               <div key={t.id} className="flex items-center justify-between py-2.5">
                 <div className="flex items-center gap-3">
                   <span className="text-xl" aria-hidden="true">
-                    {categoryIcon(t.category)}
+                    {t.transfer_group_id ? "⇄" : categoryIcon(t.category)}
                   </span>
                   <div>
                     <div className="text-sm font-medium text-navy">{t.description ?? t.category ?? "Transaction"}</div>

@@ -23,6 +23,8 @@ import type {
   Transaction,
   TransactionCreateInput,
   TransactionUpdateInput,
+  TransferCreateInput,
+  TransferResponse,
 } from "~/lib/types";
 
 // One shared getToken-bound request function per component render --
@@ -96,6 +98,24 @@ export function useCreateTransaction() {
       // current_balance (computed server-side from the transaction
       // sum) -- both caches need invalidating, not just the one the
       // mutation directly touched.
+      void queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      void queryClient.invalidateQueries({ queryKey: ["accounts"] });
+    },
+  });
+}
+
+export function useCreateTransfer() {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: TransferCreateInput) =>
+      apiRequest<TransferResponse>("/transactions/transfer", getToken, {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      // Same reasoning as useCreateTransaction -- a transfer changes
+      // both accounts' balances, not just the transactions list.
       void queryClient.invalidateQueries({ queryKey: ["transactions"] });
       void queryClient.invalidateQueries({ queryKey: ["accounts"] });
     },
